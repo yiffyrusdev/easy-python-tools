@@ -5,7 +5,7 @@ Both Python anc C++ implementations are in plans:
 - Any Python implementation is cross-platform but achieve less average performance goals
 - C++ implementations are currently supported only for Linux and provided in this repository in two ways:
   - Prebuilt .so files, so in average case you can just "git clone" and use C++ classes in Python project
-  - Source code
+  - Source code _(try your luck and build it for Windows)_
 
 ## Roadmap
 - **Pseudo structures**
