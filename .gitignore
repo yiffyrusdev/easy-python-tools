@@ -1,0 +1,13 @@
+.idea
+__pycache__
+venv*
+cpp_lib/cmake-build-debug
+cpp_lib/dist/.cmake
+cpp_lib/dist/CMakeFiles
+cpp_lib/dist/Testing
+cpp_lib/dist/.ninja*
+cpp_lib/dist/build.ninja
+cpp_lib/dist/cmake_install.cmake
+cpp_lib/dist/CMakeCache.txt
+cpp_lib/.cmake
+tests/
