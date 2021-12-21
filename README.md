@@ -8,23 +8,43 @@ Both Python anc C++ implementations are in plans:
   - Source code
 
 ## Roadmap
-- [x] Pseudo structures
-  - [x] Stack **(C++)**
-  - [x] Queue **(C++)**
-- [ ] Basic data structures
-  - [ ] Trees
+- [ ] **Pseudo structures**
+  - [x] Stack _(C++)_
+  - [x] Queue _(C++)_
+  - [ ] Prioritized Queue
+    - [ ] _Python_
+    - [ ] _C++_
+- [ ] **Basic data structures**
+  - [ ] **Plain**
+    - [ ] LinkedList
+      - [ ] _Python_
+      - [ ] _C++_
+    - [ ] LinkedList with O(1) index access _(C++)_
+  - [ ] **Trees**
     - [ ] Tree of arbitrary objects
-    - [x] Binary tree with post-insertion balance **(Python, C++)**
-    - [x] Prefix tree for sequential search **(Python, C++)**
+      - [ ] _Python_
+      - [ ] _C++_
+    - [x] Binary tree with post-insertion balance
+      - [x] _Python_
+      - [x] _C++_
+    - [x] Prefix tree for sequential search
+      - [x] _Python_
+      - [x] _C++_
     - [ ] Red-black tree
+      - [ ] _Python_
+      - [ ] _C++_
     - [ ] AVL tree
+      - [ ] _Python_
+      - [ ] _C++_
     - [ ] 1-2-3 tree
-  - [ ] Graph-based
-    - [x] Graph **(Python)**
-    - [x] Oriented graph **(Python)**
-    - [ ] Network with flows
-- [x] Class and object enhancements
-  - [x] DataTransferObject class decorator **(Python only)**
+      - [ ] _Python_
+      - [ ] _C++_
+  - [ ] **Graphs**
+    - [x] Graph _(Python)_
+    - [x] Oriented graph _(Python)_
+    - [ ] Network with flows _(Python)_
+- [x] **Class and object enhancements**
+  - [x] DataTransferObject class decorator _(Python)_
 
 ## Requirements
 Python implementations require the following:
