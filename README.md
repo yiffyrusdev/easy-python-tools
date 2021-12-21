@@ -8,19 +8,19 @@ Both Python anc C++ implementations are in plans:
   - Source code
 
 ## Roadmap
-- [ ] **Pseudo structures**
+- **Pseudo structures**
   - [x] Stack _(C++)_
   - [x] Queue _(C++)_
   - [ ] Prioritized Queue
     - [ ] _Python_
     - [ ] _C++_
-- [ ] **Basic data structures**
-  - [ ] **Plain**
+- **Basic data structures**
+  - **Plain**
     - [ ] LinkedList
       - [ ] _Python_
       - [ ] _C++_
     - [ ] LinkedList with O(1) index access _(C++)_
-  - [ ] **Trees**
+  - **Trees**
     - [ ] Tree of arbitrary objects
       - [ ] _Python_
       - [ ] _C++_
@@ -39,11 +39,11 @@ Both Python anc C++ implementations are in plans:
     - [ ] 1-2-3 tree
       - [ ] _Python_
       - [ ] _C++_
-  - [ ] **Graphs**
+  - **Graphs**
     - [x] Graph _(Python)_
     - [x] Oriented graph _(Python)_
     - [ ] Network with flows _(Python)_
-- [x] **Class and object enhancements**
+- **Class and object enhancements**
   - [x] DataTransferObject class decorator _(Python)_
 
 ## Requirements
