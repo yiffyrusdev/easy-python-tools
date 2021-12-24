@@ -23,9 +23,10 @@ Any help and criticism is greatly appreciated.
     - [x] Single table INSERT
     - [x] Single table SELECT
     - [ ] Single table UPDATE
-  - [x] Basic Table union
+  - [x] Basic Table compositions
     - [x] Automatical INNER JOIN on foreign keys
     - [x] Cartesian product
+    - [x] SELECT from table composition
   - [ ] Advanced Table operations
     - [ ] Ordering
     - [ ] Group functions
