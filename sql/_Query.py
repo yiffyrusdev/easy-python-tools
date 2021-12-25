@@ -1,3 +1,4 @@
+from typing import Iterable
 from ._Table import *
 from ._internal import proper_values
 

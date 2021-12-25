@@ -34,9 +34,12 @@ class Table:
         raise KeyError(f"{self} has no field {field_name}")
 
     def has_field(self, field_name: str) -> bool:
-        for try_table in self.binded:
-            if (fname := f'{try_table.name}.{field_name}') in self.fields:
-                return True
+        if "." in field_name:
+            return field_name in self.fields
+        else:
+            for try_table in self.binded:
+                if (fname := f'{try_table.name}.{field_name}') in self.fields:
+                    return True
         return False
 
     @property
@@ -106,9 +109,11 @@ class Table:
             raise KeyError(f"{self} and {other} could not be joined")
 
         for fk, fkey in slave.foreign_keys.items():
-            if self.has_field(fkey.master_field.name):
-                master_ref = master.field_from_name(fkey.master_field.name)
+            try_master_ref = f'{fkey.master_field.table.name}.{fkey.master_field.name}'
+            if master.has_field(try_master_ref):
+                master_ref = try_master_ref
                 slave_ref = slave.field_from_name(fkey.slave_field.name)
+                break
 
         binded = self.binded.union(other.binded)
         query = f'({self.query} INNER JOIN {other.query} ON {master_ref} = {slave_ref})'
