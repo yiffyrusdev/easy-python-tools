@@ -25,15 +25,34 @@ class Table:
             self._foreign_tables.add(fk.master_field.table)
 
     def field_by_name(self, field_name: str) -> 'TableField':
-        return self._fields[f'{self.name}.{field_name}']
+        """
+        Get TableField reference by field_name from this Table.
+        :param field_name: field name with (or without) real Table name reference.
+        :return:
+        """
+        if "." in field_name:
+            return self._fields[field_name]
+        else:
+            return self._fields[f'{self.name}.{field_name}']
 
     def field_from_name(self, field_name: str) -> str:
+        """
+        Copmile <Table_Name>.<Field_Name> from only Field_Name for one of this Table's real binded Tabled.
+        If field is not present in Table, raise KeyError.
+        :param field_name: field name.
+        :return: field name with this Table's name reference
+        """
         for try_table in self.binded:
-            if (fname := f'{try_table.name}.{field_name}') in self.fields:
+            if self.has_field(fname := f'{try_table.name}.{field_name}'):
                 return fname
         raise KeyError(f"{self} has no field {field_name}")
 
     def has_field(self, field_name: str) -> bool:
+        """
+        Is this Table has field.
+        :param field_name: field name with (or without) real Table name reference.
+        :return: This Table contains field
+        """
         if "." in field_name:
             return field_name in self.fields
         else:
@@ -42,8 +61,23 @@ class Table:
                     return True
         return False
 
+    def has_fields(self, field_names: Iterable[str]) -> bool:
+        """
+        Table.has_field() for Iterable of field names.
+        :param field_names: Iterable of field_names.
+        :return: True - all given field names are present in this Table.
+        """
+        for f in field_names:
+            if not self.has_field(f):
+                return False
+        return True
+
     @property
     def is_real(self) -> bool:
+        """
+        Is this Table really contained in DBase or just a complex structure of other Tables.
+        :return: True - Table is present in DBase, False - Table is a composition of real Tables.
+        """
         return self._is_real
 
     @property
@@ -52,19 +86,37 @@ class Table:
 
     @property
     def query(self) -> str:
+        """
+        This Table query for DBase.
+        This is SQL command used to get current Table's structure from DBase.
+        :return: str of query reference
+        """
         return self._query
 
     @property
     def binded(self) -> set['Table']:
+        """
+        All tables binded with this Table.
+        'Binded' means that 'binded table' is present in DBase as real table and is used to make queries to this Table.
+        :return: set of binded Tables
+        """
         return self._binded
 
     @property
     def db(self) -> 'DBase':
+        """
+        Database which contains this table.
+        :return: DBase reference
+        """
         return self._db
 
     @property
     def fields(self) -> dict['TableField']:
         return self._fields.copy()
+
+    @property
+    def primary_key(self) -> 'TableField':
+        return self._primary_key
 
     @property
     def foreign_keys(self) -> dict[str, 'TableFK']:
@@ -74,7 +126,12 @@ class Table:
     def foreign_tables(self) -> set['Table']:
         return self._foreign_tables.copy()
 
-    def __getitem__(self, field_names) -> 'SelectQuery':
+    def __getitem__(self, field_names: slice | tuple[str]) -> 'SelectQuery':
+        """
+        Create SelectQuery for Table.
+        :param field_names: Table field names to select
+        :return: new SelectQuery
+        """
         if isinstance(field_names, slice):
             field_names = tuple(self.fields.keys())
 
@@ -89,7 +146,22 @@ class Table:
 
         return SelectQuery(self, fields=fields)
 
+    def __setitem__(self, field_names: tuple[str], values: tuple[str]) -> 'UpdateQuery':
+        """
+        Create UpdateQuery for Table.
+        Only Real Tables supported.
+        :param field_names: fields to update.
+        :param values: values for fields.
+        :return: new UpdateQuery
+        """
+        raise NotImplementedError()
+
     def __mul__(self, other: 'Table') -> 'Table':
+        """
+        Make cartisian prodyts of tables.
+        :param other: other Table for production
+        :return: new Table with is_real=False property
+        """
         name = f'{self.name}_x_{other.name}'
         binded = self.binded.union(other.binded)
         query = f'({self.query},{other._query})'
@@ -97,6 +169,11 @@ class Table:
         return Table(name, self._db, table_query=query, binded_tables=binded)
 
     def __and__(self, other: 'Table') -> 'Table':
+        """
+        Join two tables by foreign key.
+        :param other: other Table to join
+        :return: new Table with is_real=False property
+        """
         if maybe := self.binded.intersection(other.foreign_tables):
             name = f'{other.name}_j_{self.name}'
             master = self
@@ -120,6 +197,37 @@ class Table:
 
         return Table(name, self.db, table_query=query, binded_tables=binded)
 
+    def __lshift__(self, values: tuple | dict):
+        """
+        Insert new row into this Table with specified values.
+        Gaps in values are not supported.
+        Only Real Tables supported.
+
+        if <tuple> is passed:
+        - Values order must match this Table fields order. See Table.fields property.
+        - If Table Primary Key is AUTOINCREMENT you have not to use dict.
+
+        if <dict> is passed:
+        - keys are field names, values are values.
+        :param values: <tuple | dict> definition for new row.
+        """
+        if not self.is_real:
+            raise TypeError(f'Only Real Tables supported. {self} is a query composition of {self.binded} tables')
+
+        if isinstance(values, tuple):
+            fields = tuple(field.name for field in tuple(self._fields.values())[:len(values)])
+        elif isinstance(values, dict):
+            fields = tuple(values.keys())
+            values = tuple(values.values())
+        else:
+            raise TypeError(f'expected <tuple> or <dict>, got {type(values)}')
+
+        for f in fields:
+            if not self.has_field(f):
+                raise KeyError(f'Table {self} does not have field {f}')
+
+        self.db.insert(self.name, fields, values)
+
     def __repr__(self) -> str:
         return f'Table<{self.name} of {self.db.name}>'
 
@@ -131,11 +239,13 @@ class Table:
 
 
 class TableField:
-    def __init__(self, i: int, name: str, typ: str, table_obj: Table):
+    def __init__(self, i: int, name: str, typ: str, table_obj: Table, is_primary = False, attrs: set[str] = None):
         self.id = i
         self.name = name
         self.type = typ
         self.table = table_obj
+        self.is_primary = is_primary
+        self.attrs = attrs if attrs is not None else set()
 
     def __repr__(self) -> str:
         return f'Field<{self.id}, {self.name}, {self.type} of {self.table}>'

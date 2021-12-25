@@ -3,6 +3,11 @@ from ._Table import *
 from ._internal import proper_values
 
 
+class UpdateQuery:
+    def __init__(self, target: 'Table', fields: Iterable[str], values: Iterable, where: Iterable[str] = None):
+        pass
+
+
 class SelectQuery:
     def __init__(self, source: 'Table', fields: Iterable[str] = None, where: Iterable[str] = None):
         self._source = source

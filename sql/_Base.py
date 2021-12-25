@@ -100,7 +100,8 @@ class DBase:
 
     def table_fields(self, table: Table) -> dict[str, TableField]:
         result = self.query(f'PRAGMA table_info({table.query})').fetchall()
-        fields = dict((f"{table.name}.{name}", TableField(i, name, typ, table)) for i,name,typ,_,_,_ in result)
+        fields = dict((f"{table.name}.{name}", TableField(i, name, typ, table, is_primary=(pk != 0))) for i,name,typ,_,_,pk in result)
+
         return fields
 
     def table_foreign_keys(self, table: Table) -> dict[str, TableFK]:
@@ -115,8 +116,16 @@ class DBase:
         return keys
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._db_file
+
+    @property
+    def tables(self) -> set[str]:
+        return self._db_tables
+
+    @property
+    def active_tables(self) -> dict[str, Table]:
+        return self._active_tables.copy()
 
     def __repr__(self) -> str:
         return f'DBase<{self.name}>'
