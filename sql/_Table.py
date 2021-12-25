@@ -30,10 +30,7 @@ class Table:
         :param field_name: field name with (or without) real Table name reference.
         :return:
         """
-        if "." in field_name:
-            return self._fields[field_name]
-        else:
-            return self._fields[f'{self.name}.{field_name}']
+        return self._fields[self.field_from_name(field_name)]
 
     def field_from_name(self, field_name: str) -> str:
         """
@@ -148,13 +145,11 @@ class Table:
             if master.has_field(try_master_ref):
                 return fkey
 
-    def join(self, other: 'Table', join: str, self_field: str, other_field: str, exclusive=False) -> 'Table':
+    def join(self, other: 'Table', join: str, self_field: 'TableField', other_field: 'TableField') -> 'Table':
         name = f"{self.name}_{join}_{other.name}"
 
         binded = self.binded.union(other.binded)
-        query = f'{self.query} {join} JOIN {other.query} ON {self.field_from_name(self_field)} = {other.field_from_name(other_field)}'
-        if exclusive:
-            query = f'SELECT * FROM {query} WHERE {other.field_from_name(other_field)} IS NULL'
+        query = f'{self.query} {join} JOIN {other.query} ON {self_field.full_name} = {other_field.full_name}'
 
         return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
 
@@ -166,17 +161,12 @@ class Table:
         """
         if isinstance(field_names, slice):
             field_names = tuple(self.fields.keys())
-
         if not isinstance(field_names, tuple):
             field_names = (field_names,)
-        fields = []
-        for f in field_names:
-            if f not in self.fields:
-                fields.append(self.field_from_name(f))
-            else:
-                fields.append(f)
 
-        return SelectQuery(self, fields=fields)
+        fields = (self.field_by_name(f) for f in field_names)
+
+        return SelectQuery(self, fields)
 
     def __setitem__(self, field_names: tuple[str], values: tuple[str]) -> 'UpdateQuery':
         """
@@ -196,7 +186,7 @@ class Table:
         """
         name = f'{self.name}_x_{other.name}'
         binded = self.binded.union(other.binded)
-        query = f'({self.query},{other._query})'
+        query = f'({self.query} CROSS JOIN {other._query})'
 
         return Table(name, self._db, table_query=query, binded_tables=binded)
 
@@ -210,10 +200,10 @@ class Table:
         master = fk_connection.master_field.table
         slave = fk_connection.slave_field.table
 
-        master_ref = master.field_from_name(fk_connection.master_field.name)
-        slave_ref = slave.field_from_name(fk_connection.slave_field.name)
+        master_ref = fk_connection.master_field
+        slave_ref = fk_connection.slave_field
 
-        return self.join(other, 'FULL', master_ref, slave_ref, exclusive=True)
+        return self.join(other, 'FULL', master_ref, slave_ref)
 
     def __sub__(self, other: 'Table') -> 'Table':
         """
@@ -225,13 +215,13 @@ class Table:
         fk_connection = self.catch_fk_connection(other)
 
         if fk_connection.master_field.table == self:
-            self_ref = self.field_from_name(fk_connection.master_field.name)
-            other_ref = other.field_from_name(fk_connection.slave_field.name)
+            self_ref = fk_connection.master_field
+            other_ref = fk_connection.slave_field
         else:
-            self_ref = self.field_from_name(fk_connection.slave_field.name)
-            other_ref = other.field_from_name(fk_connection.master_field.name)
+            self_ref = fk_connection.slave_field
+            other_ref = fk_connection.master_field
 
-        return self.join(other, 'LEFT', self_ref, other_ref, exclusive=True)
+        return self.join(other, 'LEFT', self_ref, other_ref)
 
     def __and__(self, other: 'Table') -> 'Table':
         """
@@ -244,8 +234,8 @@ class Table:
         master = fk_connection.master_field.table
         slave = fk_connection.slave_field.table
 
-        master_ref = master.field_from_name(fk_connection.master_field.name)
-        slave_ref = slave.field_from_name(fk_connection.slave_field.name)
+        master_ref = fk_connection.master_field
+        slave_ref = fk_connection.slave_field
 
         return self.join(other, 'INNER', master_ref, slave_ref)
 
@@ -298,6 +288,10 @@ class TableField:
         self.table = table_obj
         self.is_primary = is_primary
         self.attrs = attrs if attrs is not None else set()
+
+    @property
+    def full_name(self) -> str:
+        return self.table.field_from_name(self.name)
 
     def __repr__(self) -> str:
         return f'Field<{self.id}, {self.name}, {self.type} of {self.table}>'
