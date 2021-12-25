@@ -1,8 +1,9 @@
 import sqlite3
 from typing import Iterable
 
-from ._exceptions import TableNotFound, TableAlreadyExists
-from ._Table import Table, TableField, TableFK
+from ._exceptions import *
+from ._Table import *
+from ._internal import *
 
 
 class DBase:
@@ -33,27 +34,32 @@ class DBase:
             fields = f'{", ".join(f"{k} {v}" for k, v in fields.items())}'
             query = f'CREATE TABLE {table_name}({fields});'
             print(query)
-            self._db_cursor.execute(query)
+            self.query(query)
             self._db_connection.commit()
 
             self._db_tables = self.get_tables()
 
             return self.table(table_name)
 
+    def query(self, query: str, commit=False):
+        res = self._db_cursor.execute(query)
+        if commit:
+            self._db_connection.commit()
+        return res
+
     def select(self, source: str, fields: Iterable[str]):
-        return self._db_cursor.execute(f'SELECT {",".join(fields)} FROM {source};').fetchall()
+        return self.query(f'SELECT {",".join(fields)} FROM {source};').fetchall()
 
     def insert(self, target: str, fields: Iterable[str], values: Iterable):
-        fields = f'{",".join(fields)}'
-        proper_values = []
-        for v in values:
-            if isinstance(v, str):
-                proper_values.append(f'"{v}"')
-            else:
-                proper_values.append(str(v))
-        values = f'{",".join(proper_values)}'
+        f_names = []
+        f_values = []
+        for f, v in zip(fields, proper_values(values)):
+            if v == "NULL":
+                continue
+            f_names.append(f)
+            f_values.append(v)
 
-        self._db_cursor.execute(f'INSERT INTO {target}({fields}) VALUES({values});')
+        self.query(f'INSERT INTO {target}({",".join(f_names)}) VALUES({",".join(f_values)});', commit=True)
         self._db_connection.commit()
 
     def has_tables(self, tables: Iterable[str | Table]) -> bool:
@@ -67,7 +73,7 @@ class DBase:
         return table_name in self._db_tables
 
     def get_tables(self) -> set[str]:
-        tables = self._db_cursor.execute('SELECT name from sqlite_master where type="table"').fetchall()
+        tables = self.query('SELECT name from sqlite_master where type="table"').fetchall()
         return set(t[0] for t in tables)
 
     def get_fields(self, table: str) -> dict[str, TableField]:
@@ -93,12 +99,12 @@ class DBase:
         return True
 
     def table_fields(self, table: Table) -> dict[str, TableField]:
-        result = self._db_cursor.execute(f'PRAGMA table_info({table.query})').fetchall()
+        result = self.query(f'PRAGMA table_info({table.query})').fetchall()
         fields = dict((f"{table.name}.{name}", TableField(i, name, typ, table)) for i,name,typ,_,_,_ in result)
         return fields
 
     def table_foreign_keys(self, table: Table) -> dict[str, TableFK]:
-        result = self._db_cursor.execute(f'PRAGMA foreign_key_list({table.query})').fetchall()
+        result = self.query(f'PRAGMA foreign_key_list({table.query})').fetchall()
         keys = dict()
 
         for f in result:

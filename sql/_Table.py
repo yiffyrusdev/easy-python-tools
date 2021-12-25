@@ -1,4 +1,6 @@
 from typing import Iterable
+from ._Base import *
+from ._Query import *
 
 
 class Table:
@@ -32,7 +34,10 @@ class Table:
         raise KeyError(f"{self} has no field {field_name}")
 
     def has_field(self, field_name: str) -> bool:
-        return f'{self.name}.{field_name}' in self.fields
+        for try_table in self.binded:
+            if (fname := f'{try_table.name}.{field_name}') in self.fields:
+                return True
+        return False
 
     @property
     def is_real(self) -> bool:
@@ -51,8 +56,8 @@ class Table:
         return self._binded
 
     @property
-    def db_name(self) -> str:
-        return self._db.name
+    def db(self) -> 'DBase':
+        return self._db
 
     @property
     def fields(self) -> dict['TableField']:
@@ -66,7 +71,7 @@ class Table:
     def foreign_tables(self) -> set['Table']:
         return self._foreign_tables.copy()
 
-    def __getitem__(self, field_names):
+    def __getitem__(self, field_names) -> 'SelectQuery':
         if isinstance(field_names, slice):
             field_names = tuple(self.fields.keys())
 
@@ -78,7 +83,8 @@ class Table:
                 fields.append(self.field_from_name(f))
             else:
                 fields.append(f)
-        return self._db.select(self.query, fields)
+
+        return SelectQuery(self, fields=fields)
 
     def __mul__(self, other: 'Table') -> 'Table':
         name = f'{self.name}_x_{other.name}'
@@ -88,11 +94,11 @@ class Table:
         return Table(name, self._db, table_query=query, binded_tables=binded)
 
     def __and__(self, other: 'Table') -> 'Table':
-        if self in other.foreign_tables:
+        if maybe := self.binded.intersection(other.foreign_tables):
             name = f'{other.name}_j_{self.name}'
             master = self
             slave = other
-        elif other in self.foreign_tables:
+        elif maybe := other.binded.intersection(self.foreign_tables):
             name = f'{self.name}_j_{other.name}'
             master = other
             slave = self
@@ -107,16 +113,16 @@ class Table:
         binded = self.binded.union(other.binded)
         query = f'({self.query} INNER JOIN {other.query} ON {master_ref} = {slave_ref})'
 
-        return Table(name, self._db, table_query=query, binded_tables=binded)
+        return Table(name, self.db, table_query=query, binded_tables=binded)
 
     def __repr__(self) -> str:
-        return f'Table<{self.name} of {self.db_name}>'
+        return f'Table<{self.name} of {self.db.name}>'
 
     def __eq__(self, other: 'Table'):
-        return (self.query == other.query) and (self.db_name == other.db_name)
+        return (self.query == other.query) and (self.db.name == other.db.name)
 
     def __hash__(self):
-        return hash((self.query, self.db_name))
+        return hash((self.query, self.db.name))
 
 
 class TableField:
@@ -133,7 +139,7 @@ class TableField:
         return (self.name == other.name) and (self.table == other.table)
 
     def __hash__(self):
-        return hash((self.name, self.table.name, self.table.db_name))
+        return hash((self.name, self.table.name, self.table.db.name))
 
 
 class TableFK:

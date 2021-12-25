@@ -1,27 +1,15 @@
 from abc import abstractmethod
-from typing import Protocol, TypeVar
+from typing import Protocol, TypeVar, Iterable
 
 
-class TableTypeClass(Protocol):
-    @abstractmethod
-    @property
-    def name(self) -> str:
-        pass
+def proper_values(values: Iterable) -> list:
+    proper_values = []
+    for v in values:
+        if isinstance(v, str):
+            proper_values.append(f'"{v}"')
+        elif v is None:
+            proper_values.append('NULL')
+        else:
+            proper_values.append(f'{v}')
+    return proper_values
 
-    @abstractmethod
-    @property
-    def db_name(self) -> str:
-        pass
-
-    @abstractmethod
-    @property
-    def fields(self) -> dict['TableField']:
-        pass
-
-    @abstractmethod
-    @property
-    def foreign_keys(self) -> set['TableFK']:
-        pass
-
-
-TableType = TypeVar('TableType', bound=TableTypeClass)

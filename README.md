@@ -27,7 +27,9 @@ Any help and criticism is greatly appreciated.
     - [x] Automatical INNER JOIN on foreign keys
     - [x] Cartesian product
     - [x] SELECT from table composition
+    - [x] Treat Composition as Table
   - [ ] Advanced Table operations
+    - [x] WHERE selection
     - [ ] Ordering
     - [ ] Group functions
   - [ ] Views
