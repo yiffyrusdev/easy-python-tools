@@ -1,10 +1,10 @@
 from typing import Iterable
-from ._Base import *
-from ._Query import *
+import sql._Base as _Base
+import sql._Query as _Query
 
 
 class Table:
-    def __init__(self, table_name: str, db_obj: 'Base', table_query: str=None, binded_tables: Iterable['Table']=None):
+    def __init__(self, table_name: str, db_obj: '_Base.DBase', table_query: str=None, binded_tables: Iterable['Table']=None):
         self._name = table_name
         self._query = table_name if table_query is None else table_query
         self._is_real = binded_tables is None
@@ -102,7 +102,7 @@ class Table:
         return self._binded
 
     @property
-    def db(self) -> 'DBase':
+    def db(self) -> '_Base.DBase':
         """
         Database which contains this table.
         :return: DBase reference
@@ -112,10 +112,6 @@ class Table:
     @property
     def fields(self) -> dict['TableField']:
         return self._fields.copy()
-
-    @property
-    def primary_key(self) -> 'TableField':
-        return self._primary_key
 
     @property
     def foreign_keys(self) -> dict[str, 'TableFK']:
@@ -153,7 +149,7 @@ class Table:
 
         return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
 
-    def __getitem__(self, field_names: slice | tuple[str]) -> 'SelectQuery':
+    def __getitem__(self, field_names: slice | tuple) -> '_Query.SelectQuery':
         """
         Create SelectQuery for Table.
         :param field_names: Table field names to select
@@ -166,9 +162,9 @@ class Table:
 
         fields = (self.field_by_name(f) for f in field_names)
 
-        return SelectQuery(self, fields)
+        return _Query.SelectQuery(self, fields)
 
-    def __setitem__(self, field_names: tuple[str], values: tuple[str]) -> 'UpdateQuery':
+    def __setitem__(self, field_names: tuple, values: tuple) -> '_Query.UpdateQuery':
         """
         Create UpdateQuery for Table.
         Only Real Tables supported.

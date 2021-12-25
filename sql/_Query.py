@@ -1,16 +1,15 @@
 from typing import Iterable, Union
-from ._Table import *
-from ._internal import proper_values
-from ._Where import *
+import sql._Table as _Table
+import sql._Where as _Where
 
 
 class UpdateQuery:
-    def __init__(self, target: 'Table', fields: Iterable['TableField'], values: Iterable, where: 'Where' = None):
+    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: '_Where.Where' = None):
         pass
 
 
 class SelectQuery:
-    def __init__(self, source: 'Table', fields: Iterable['TableField'], where: 'Where' = None, distinct=False):
+    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: _Where.Where = None, distinct=False):
         self._source = source
         self._fields = tuple(fields)
         self._distinct = distinct
@@ -18,11 +17,11 @@ class SelectQuery:
         self._body = None
 
     @property
-    def source(self) -> 'Table':
+    def source(self) -> '_Table.Table':
         return self._source
 
     @property
-    def fields(self) -> tuple['TableField']:
+    def fields(self) -> tuple['_Table.TableField']:
         return self._fields
 
     @property
@@ -33,35 +32,28 @@ class SelectQuery:
     def distinct(self) -> 'SelectQuery':
         return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=True)
 
-    def __eq__(self, values) -> 'SelectQuery':
-        if not isinstance(values, tuple):
-            values = (values,)
-        values = proper_values(values)
+    def __eq__(self, values: list | tuple) -> 'SelectQuery':
+        if isinstance(values, list):
+            where_type = _Where.WhereAND
+        elif isinstance(values, tuple):
+            where_type = _Where.WhereOR
+        else:
+            raise TypeError(f'expected <tuple> for AND or <list> for OR, got {type(values)}')
 
         new_wheres = []
-        for field, cmp in zip(self.fields, values):
-            new_wheres.append(WhereEq(field, cmp))
-        if self._where is None:
-            new_where = WhereAND(*new_wheres)
-        else:
-            new_where = WhereAND(self._where, *new_wheres)
+        for value, field in zip(values, self.fields):
+            if isinstance(value, tuple):
+                new_where = _Where.WhereOR(*(_Where.WhereEq(field, v) for v in value))
+            elif isinstance(value, list):
+                new_where = _Where.WhereAND(*(_Where.WhereEq(field, v) for v in value))
+            else:
+                new_where = _Where.WhereEq(field, value)
 
-        return SelectQuery(self.source, fields=self.fields, where=new_where)
+            new_wheres.append(new_where)
 
-    def __or__(self, values) -> 'SelectQuery':
-        if not isinstance(values, tuple):
-            values = (values,)
-        values = proper_values(values)
+        where = where_type(*new_wheres)
 
-        new_wheres = []
-        for field, cmp in zip(self.fields, values):
-            new_wheres.append(WhereEq(field, cmp))
-        if self._where is None:
-            new_where = WhereOR(*new_wheres)
-        else:
-            new_where = WhereOR(self._where, *new_wheres)
-
-        return SelectQuery(self.source, fields=self.fields, where=new_where)
+        return SelectQuery(self.source, self.fields, where=where, distinct=self._distinct)
 
     def __call__(self, force=False):
         if (self.body is None) or force:

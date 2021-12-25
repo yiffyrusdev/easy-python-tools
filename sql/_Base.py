@@ -1,9 +1,9 @@
 import sqlite3
-from typing import Iterable
+from typing import Iterable, Union
 
-from ._exceptions import *
-from ._Table import *
-from ._internal import *
+import sql._exceptions as _exceptions
+import sql._Table as _Table
+import sql._internal as _internal
 
 
 class DBase:
@@ -14,22 +14,22 @@ class DBase:
         self._db_cursor = self._db_connection.cursor()
 
         self._db_tables = self.get_tables()
-        self._active_tables: dict[str, Table] = dict()
+        self._active_tables: dict[str, '_Table.Table'] = dict()
 
-    def table(self, table_name: str) -> Table:
+    def table(self, table_name: str) -> '_Table.Table':
         if self.has_table(table_name):
             if table_name in self._active_tables:
                 table = self._active_tables[table_name]
             else:
-                table = Table(table_name, self)
+                table = _Table.Table(table_name, self)
                 self._active_tables[table_name] = table
             return table
         else:
-            raise TableNotFound(table_name, self.name)
+            raise _exceptions.TableNotFound(table_name, self.name)
 
-    def new_table(self, table_name: str, fields: dict) -> Table:
+    def new_table(self, table_name: str, fields: dict) -> '_Table.Table':
         if self.has_table(table_name):
-            raise TableAlreadyExists(table_name, self.name)
+            raise _exceptions.TableAlreadyExists(table_name, self.name)
         else:
             fields = f'{", ".join(f"{k} {v}" for k, v in fields.items())}'
             query = f'CREATE TABLE {table_name}({fields});'
@@ -53,7 +53,7 @@ class DBase:
     def insert(self, target: str, fields: Iterable[str], values: Iterable):
         f_names = []
         f_values = []
-        for f, v in zip(fields, proper_values(values)):
+        for f, v in zip(fields, _internal.proper_values(values)):
             if v == "NULL":
                 continue
             f_names.append(f)
@@ -62,13 +62,13 @@ class DBase:
         self.query(f'INSERT INTO {target}({",".join(f_names)}) VALUES({",".join(f_values)});', commit=True)
         self._db_connection.commit()
 
-    def has_tables(self, tables: Iterable[str | Table]) -> bool:
+    def has_tables(self, tables: Iterable[Union[str, '_Table.Table']]) -> bool:
         for table in tables:
             if not self.has_table(table):
                 return False
         return True
 
-    def has_table(self, table_name: str | Table) -> bool:
+    def has_table(self, table_name: Union[str,'_Table.Table']) -> bool:
         table_name = table_name if isinstance(table_name, str) else table_name.name
         return table_name in self._db_tables
 
@@ -76,41 +76,41 @@ class DBase:
         tables = self.query('SELECT name from sqlite_master where type="table"').fetchall()
         return set(t[0] for t in tables)
 
-    def get_fields(self, table: str) -> dict[str, TableField]:
+    def get_fields(self, table: str) -> dict[str, '_Table.TableField']:
         if not self.has_table(table):
-            raise TableNotFound(table, self.name)
+            raise _exceptions.TableNotFound(table, self.name)
 
         table = self.table(table)
         return self.table_fields(table)
 
-    def get_foreign_keys(self, table: str) -> dict[str, TableFK]:
+    def get_foreign_keys(self, table: str) -> dict[str, '_Table.TableFK']:
         if not self.has_table(table):
-            raise TableNotFound(table, self.name)
+            raise _exceptions.TableNotFound(table, self.name)
 
         table = self.table(table)
         return self.table_foreign_keys(table)
 
-    def table_satisfied(self, table: Table) -> bool:
+    def table_satisfied(self, table: '_Table.Table') -> bool:
         return self.has_tables(table.binded)
 
-    def tables_satified(self, tables: Iterable[Table]) -> bool:
+    def tables_satified(self, tables: Iterable['_Table.Table']) -> bool:
         for t in tables:
             return self.table_satisfied(t)
         return True
 
-    def table_fields(self, table: Table) -> dict[str, TableField]:
+    def table_fields(self, table: '_Table.Table') -> dict[str, '_Table.TableField']:
         result = self.query(f'PRAGMA table_info({table.query})').fetchall()
-        fields = dict((f"{table.name}.{name}", TableField(i, name, typ, table, is_primary=(pk != 0))) for i,name,typ,_,_,pk in result)
+        fields = dict((f"{table.name}.{name}", _Table.TableField(i, name, typ, table, is_primary=(pk != 0))) for i,name,typ,_,_,pk in result)
 
         return fields
 
-    def table_foreign_keys(self, table: Table) -> dict[str, TableFK]:
+    def table_foreign_keys(self, table: '_Table.Table') -> dict[str, '_Table.TableFK']:
         result = self.query(f'PRAGMA foreign_key_list({table.query})').fetchall()
         keys = dict()
 
         for f in result:
             master = self.table(f[2])
-            fk = TableFK(master.field_by_name(f[4]), table.field_by_name(f[3]))
+            fk = _Table.TableFK(master.field_by_name(f[4]), table.field_by_name(f[3]))
             keys[f'{table.name}.{fk.slave_field.name}'] = fk
 
         return keys
@@ -124,7 +124,7 @@ class DBase:
         return self._db_tables
 
     @property
-    def active_tables(self) -> dict[str, Table]:
+    def active_tables(self) -> dict[str, '_Table.Table']:
         return self._active_tables.copy()
 
     def __repr__(self) -> str:
