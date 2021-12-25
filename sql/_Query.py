@@ -1,6 +1,7 @@
 from typing import Iterable, Union
 import sql._Table as _Table
 import sql._Where as _Where
+import sql._internal as _internal
 
 
 class UpdateQuery:
@@ -32,7 +33,7 @@ class SelectQuery:
     def distinct(self) -> 'SelectQuery':
         return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=True)
 
-    def __eq__(self, values: list | tuple) -> 'SelectQuery':
+    def new_with_where(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
         if isinstance(values, list):
             where_type = _Where.WhereAND
         elif isinstance(values, tuple):
@@ -41,19 +42,30 @@ class SelectQuery:
             raise TypeError(f'expected <tuple> for AND or <list> for OR, got {type(values)}')
 
         new_wheres = []
-        for value, field in zip(values, self.fields):
+        for value, field in zip(_internal.proper_values(values), self.fields):
+            if (value == tuple()) or (value == list()):
+                continue
             if isinstance(value, tuple):
-                new_where = _Where.WhereOR(*(_Where.WhereEq(field, v) for v in value))
+                new_where = _Where.WhereOR(*(comparison(field, v) for v in _internal.proper_values(value)))
             elif isinstance(value, list):
-                new_where = _Where.WhereAND(*(_Where.WhereEq(field, v) for v in value))
+                new_where = _Where.WhereAND(*(comparison(field, v) for v in _internal.proper_values(value)))
             else:
-                new_where = _Where.WhereEq(field, value)
+                new_where = comparison(field, value)
 
             new_wheres.append(new_where)
 
-        where = where_type(*new_wheres)
+        where = union(self._where,where_type(*new_wheres)) if self._where is not None else where_type(*new_wheres)
 
         return SelectQuery(self.source, self.fields, where=where, distinct=self._distinct)
+
+    def __eq__(self, values: list | tuple) -> 'SelectQuery':
+        return self.new_with_where(values, _Where.WhereEq, _Where.WhereAND)
+
+    def __gt__(self, values: list | tuple) -> 'SelectQuery':
+        return self.new_with_where(values, _Where.WhereGt, _Where.WhereAND)
+
+    def __lt__(self, values: list | tuple) -> 'SelectQuery':
+        return self.new_with_where(values, _Where.WhereLt, _Where.WhereAND)
 
     def __call__(self, force=False):
         if (self.body is None) or force:

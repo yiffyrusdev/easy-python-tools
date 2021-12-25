@@ -7,6 +7,8 @@ def proper_values(values: Iterable) -> list:
     for v in values:
         if isinstance(v, str):
             proper_values.append(f'"{v}"')
+        elif isinstance(v, list) or isinstance(v, tuple):
+            proper_values.append(v)
         elif v is None:
             proper_values.append('NULL')
         else:
