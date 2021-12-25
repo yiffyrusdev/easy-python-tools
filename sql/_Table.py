@@ -42,6 +42,8 @@ class Table:
         :param field_name: field name.
         :return: field name with this Table's name reference
         """
+        if "." in field_name:
+            return field_name
         for try_table in self.binded:
             if self.has_field(fname := f'{try_table.name}.{field_name}'):
                 return fname
@@ -126,6 +128,36 @@ class Table:
     def foreign_tables(self) -> set['Table']:
         return self._foreign_tables.copy()
 
+    def catch_fk_connection(self, other: 'Table') -> 'TableFK':
+        """
+        Find Foreign Key that connects two tables.
+        :param other: other Table.
+        :return: TableFK that represents connection between this Table and other Table.
+        """
+        if maybe := self.binded.intersection(other.foreign_tables):
+            master = self
+            slave = other
+        elif maybe := other.binded.intersection(self.foreign_tables):
+            master = other
+            slave = self
+        else:
+            raise KeyError(f"{self} and {other} are not connected by foreign key")
+
+        for fk, fkey in slave.foreign_keys.items():
+            try_master_ref = f'{fkey.master_field.table.name}.{fkey.master_field.name}'
+            if master.has_field(try_master_ref):
+                return fkey
+
+    def join(self, other: 'Table', join: str, self_field: str, other_field: str, exclusive=False) -> 'Table':
+        name = f"{self.name}_{join}_{other.name}"
+
+        binded = self.binded.union(other.binded)
+        query = f'{self.query} {join} JOIN {other.query} ON {self.field_from_name(self_field)} = {other.field_from_name(other_field)}'
+        if exclusive:
+            query = f'SELECT * FROM {query} WHERE {other.field_from_name(other_field)} IS NULL'
+
+        return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
+
     def __getitem__(self, field_names: slice | tuple[str]) -> 'SelectQuery':
         """
         Create SelectQuery for Table.
@@ -168,34 +200,54 @@ class Table:
 
         return Table(name, self._db, table_query=query, binded_tables=binded)
 
+    def __xor__(self, other: 'Table') -> 'Table':
+        """
+        FULL JOIN two tables by foreign key.
+        :param other: other Tabl to join.
+        :return: new Table with is_real=False property
+        """
+        fk_connection = self.catch_fk_connection(other)
+        master = fk_connection.master_field.table
+        slave = fk_connection.slave_field.table
+
+        master_ref = master.field_from_name(fk_connection.master_field.name)
+        slave_ref = slave.field_from_name(fk_connection.slave_field.name)
+
+        return self.join(other, 'FULL', master_ref, slave_ref, exclusive=True)
+
+    def __sub__(self, other: 'Table') -> 'Table':
+        """
+        LEFT JOIN two tables by foreign key.
+        If you want a RIGHT JOIN, just LEFT JOIN tables in reversed order.
+        :param other: other Table to exclude from this Table.
+        :return:new Table with is_real=False property
+        """
+        fk_connection = self.catch_fk_connection(other)
+
+        if fk_connection.master_field.table == self:
+            self_ref = self.field_from_name(fk_connection.master_field.name)
+            other_ref = other.field_from_name(fk_connection.slave_field.name)
+        else:
+            self_ref = self.field_from_name(fk_connection.slave_field.name)
+            other_ref = other.field_from_name(fk_connection.master_field.name)
+
+        return self.join(other, 'LEFT', self_ref, other_ref, exclusive=True)
+
     def __and__(self, other: 'Table') -> 'Table':
         """
-        Join two tables by foreign key.
+        INNER JOIN two tables by foreign key.
         :param other: other Table to join
         :return: new Table with is_real=False property
         """
-        if maybe := self.binded.intersection(other.foreign_tables):
-            name = f'{other.name}_j_{self.name}'
-            master = self
-            slave = other
-        elif maybe := other.binded.intersection(self.foreign_tables):
-            name = f'{self.name}_j_{other.name}'
-            master = other
-            slave = self
-        else:
-            raise KeyError(f"{self} and {other} could not be joined")
+        fk_connection = self.catch_fk_connection(other)
 
-        for fk, fkey in slave.foreign_keys.items():
-            try_master_ref = f'{fkey.master_field.table.name}.{fkey.master_field.name}'
-            if master.has_field(try_master_ref):
-                master_ref = try_master_ref
-                slave_ref = slave.field_from_name(fkey.slave_field.name)
-                break
+        master = fk_connection.master_field.table
+        slave = fk_connection.slave_field.table
 
-        binded = self.binded.union(other.binded)
-        query = f'({self.query} INNER JOIN {other.query} ON {master_ref} = {slave_ref})'
+        master_ref = master.field_from_name(fk_connection.master_field.name)
+        slave_ref = slave.field_from_name(fk_connection.slave_field.name)
 
-        return Table(name, self.db, table_query=query, binded_tables=binded)
+        return self.join(other, 'INNER', master_ref, slave_ref)
 
     def __lshift__(self, values: tuple | dict):
         """
