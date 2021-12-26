@@ -4,6 +4,9 @@ import sql._Query as _Query
 
 
 class Table:
+    """
+    Table object which represents SQL table or SQL composition of Table objects.
+    """
     def __init__(self, table_name: str, db_obj: '_Base.DBase', table_query: str=None, binded_tables: Iterable['Table']=None):
         self._name = table_name
         self._query = table_name if table_query is None else table_query
@@ -30,6 +33,7 @@ class Table:
     def field_by_name(self, field_name: str) -> 'TableField':
         """
         Get TableField reference by field_name from this Table.
+
         :param field_name: field name with (or without) real Table name reference.
         :return:
         """
@@ -38,7 +42,9 @@ class Table:
     def field_from_name(self, field_name: str) -> str:
         """
         Copmile <Table_Name>.<Field_Name> from only Field_Name for one of this Table's real binded Tabled.
+
         If field is not present in Table, raise KeyError.
+
         :param field_name: field name.
         :return: field name with this Table's name reference
         """
@@ -52,6 +58,7 @@ class Table:
     def has_field(self, field_name: str) -> bool:
         """
         Is this Table has field.
+
         :param field_name: field name with (or without) real Table name reference.
         :return: This Table contains field
         """
@@ -66,6 +73,7 @@ class Table:
     def has_fields(self, field_names: Iterable[str]) -> bool:
         """
         Table.has_field() for Iterable of field names.
+
         :param field_names: Iterable of field_names.
         :return: True - all given field names are present in this Table.
         """
@@ -78,19 +86,23 @@ class Table:
     def is_real(self) -> bool:
         """
         Is this Table really contained in DBase or just a complex structure of other Tables.
+
         :return: True - Table is present in DBase, False - Table is a composition of real Tables.
         """
         return self._is_real
 
     @property
     def name(self) -> str:
+        """Current Table's name. Not supposed to match SQL table name."""
         return self._name
 
     @property
     def query(self) -> str:
         """
         This Table query for DBase.
+
         This is SQL command used to get current Table's structure from DBase.
+
         :return: str of query reference
         """
         return self._query
@@ -99,34 +111,37 @@ class Table:
     def binded(self) -> set['Table']:
         """
         All tables binded with this Table.
+
         'Binded' means that 'binded table' is present in DBase as real table and is used to make queries to this Table.
+
         :return: set of binded Tables
         """
         return self._binded
 
     @property
     def db(self) -> '_Base.DBase':
-        """
-        Database which contains this table.
-        :return: DBase reference
-        """
+        """Database which contains this table."""
         return self._db
 
     @property
     def fields(self) -> dict['TableField']:
+        """All fields of current Table."""
         return self._fields.copy()
 
     @property
     def foreign_keys(self) -> dict[str, 'TableFK']:
+        """All foreign keys of current Table."""
         return self._foreign_keys
 
     @property
     def foreign_tables(self) -> set['Table']:
+        """All Tables to whom current Table is connected by foreign keys."""
         return self._foreign_tables.copy()
 
     def catch_fk_connection(self, other: 'Table') -> 'TableFK':
         """
         Find Foreign Key that connects two tables.
+
         :param other: other Table.
         :return: TableFK that represents connection between this Table and other Table.
         """
@@ -145,6 +160,14 @@ class Table:
                 return fkey
 
     def join(self, other: 'Table', join: str, self_field: 'TableField', other_field: 'TableField') -> 'Table':
+        """
+        Make new Table, that is composition of current and other Tables, JOINED by fields.
+        :param other: other Table to JOIN
+        :param join: JOIN type: "INNER", "LEFT" etc
+        :param self_field: field of current Table to use in JOIN comparison
+        :param other_field: field of other Table to use in JOIN comparison
+        :return:
+        """
         name = f"{self.name}_{join}_{other.name}"
 
         binded = self.binded.union(other.binded)
@@ -155,6 +178,7 @@ class Table:
     def __getitem__(self, field_names: slice | tuple) -> '_Query.SelectQuery':
         """
         Create SelectQuery for Table.
+
         :param field_names: Table field names to select
         :return: new SelectQuery
         """
@@ -170,7 +194,9 @@ class Table:
     def __setitem__(self, field_names: tuple, values: tuple) -> '_Query.UpdateQuery':
         """
         Create UpdateQuery for Table.
+
         Only Real Tables supported.
+
         :param field_names: fields to update.
         :param values: values for fields.
         :return: new UpdateQuery
@@ -180,6 +206,7 @@ class Table:
     def __mul__(self, other: 'Table') -> 'Table':
         """
         Make cartisian prodyts of tables.
+
         :param other: other Table for production
         :return: new Table with is_real=False property
         """
@@ -192,6 +219,7 @@ class Table:
     def __xor__(self, other: 'Table') -> 'Table':
         """
         FULL JOIN two tables by foreign key.
+
         :param other: other Tabl to join.
         :return: new Table with is_real=False property
         """
@@ -207,7 +235,9 @@ class Table:
     def __sub__(self, other: 'Table') -> 'Table':
         """
         LEFT JOIN two tables by foreign key.
+
         If you want a RIGHT JOIN, just LEFT JOIN tables in reversed order.
+
         :param other: other Table to exclude from this Table.
         :return:new Table with is_real=False property
         """
@@ -225,6 +255,7 @@ class Table:
     def __and__(self, other: 'Table') -> 'Table':
         """
         INNER JOIN two tables by foreign key.
+
         :param other: other Table to join
         :return: new Table with is_real=False property
         """
@@ -238,9 +269,10 @@ class Table:
 
         return self.join(other, 'INNER', master_ref, slave_ref)
 
-    def __lshift__(self, values: tuple | dict):
+    def __lshift__(self, values: tuple | dict) -> None:
         """
         Insert new row into this Table with specified values.
+
         Gaps in values are not supported.
         Only Real Tables supported.
 
@@ -250,6 +282,7 @@ class Table:
 
         if <dict> is passed:
         - keys are field names, values are values.
+
         :param values: <tuple | dict> definition for new row.
         """
         if not self.is_real:
@@ -280,6 +313,7 @@ class Table:
 
 
 class TableField:
+    """TableField object, that represents some Table field."""
     def __init__(self, i: int, name: str, typ: str, table_obj: Table, is_primary = False, attrs: set[str] = None):
         self.id = i
         self.name = name
@@ -290,6 +324,7 @@ class TableField:
 
     @property
     def full_name(self) -> str:
+        """Full name means <Table name>.<Field name>"""
         return self.table.field_from_name(self.name)
 
     def __repr__(self) -> str:
@@ -303,9 +338,20 @@ class TableField:
 
 
 class TableFK:
+    """TableFK object represents connection between two TableFields by foreign key constraint."""
     def __init__(self, master_field: TableField, slave_field: TableField):
-        self.master_field = master_field
-        self.slave_field = slave_field
+        self._master_field = master_field
+        self._slave_field = slave_field
+
+    @property
+    def master_field(self) -> 'TableField':
+        """Field of table which is Master in foreign key connection."""
+        return self._master_field
+
+    @property
+    def slave_field(self) -> 'TableField':
+        """Field of table which is Slave in foreign key connection."""
+        return self._slave_field
 
     def __repr__(self) -> str:
         return f'TableFK<{self.slave_field} -> {self.master_field}>'

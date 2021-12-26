@@ -7,6 +7,9 @@ import sql._internal as _internal
 
 
 class DBase:
+    """
+    SQLite3 database class.
+    """
     def __init__(self, dbfile: str):
         self._db_file = dbfile
 
@@ -17,6 +20,16 @@ class DBase:
         self._active_tables: dict[str, '_Table.Table'] = dict()
 
     def table(self, table_name: str) -> '_Table.Table':
+        """
+        Get Table from base.
+
+        Get interactable Table object from this DBase that represents table from base.
+
+        If table with given name have already been initialized with Table object, reference to if will be returned, not new Table object.
+
+        :param table_name: Name of existing table in sqlite3 database.
+        :return: new Table object or reference to existing Table object.
+        """
         if self.has_table(table_name):
             if table_name in self._active_tables:
                 table = self._active_tables[table_name]
@@ -28,6 +41,15 @@ class DBase:
             raise _exceptions.TableNotFound(table_name, self.name)
 
     def new_table(self, table_name: str, fields: dict) -> '_Table.Table':
+        """
+        Create new table in database and get reference Table object for it.
+
+        If table already exists in database, exception will be thrown.
+
+        :param table_name: new table name.
+        :param fields: schema for new table.
+        :return: new Table object that represents newly created table.
+        """
         if self.has_table(table_name):
             raise _exceptions.TableAlreadyExists(table_name, self.name)
         else:
@@ -42,15 +64,37 @@ class DBase:
             return self.table(table_name)
 
     def query(self, query: str, commit=False):
+        """
+        Make string SQL query to database.
+
+        :param query: SQL query string.
+        :param commit: Either commit changes to database with this query or not.
+        :return: query result whatever is is.
+        """
         res = self._db_cursor.execute(query)
         if commit:
             self._db_connection.commit()
         return res
 
-    def select(self, source: str, fields: Iterable[str]):
+    def select(self, source: str, fields: Iterable[str]) -> list[tuple]:
+        """
+        Select fields from table with no confines.
+
+        :param source: source string name as it is in database.
+        :param fields: iterable collection of field string names.
+        :return: list of tuples with selected values
+        """
         return self.query(f'SELECT {",".join(fields)} FROM {source};').fetchall()
 
-    def insert(self, target: str, fields: Iterable[str], values: Iterable):
+    def insert(self, target: str, fields: Iterable[str], values: Iterable) -> None:
+        """
+        Insert values into target table.
+
+        :param target: target table string name as it is in database.
+        :param fields: iterable collection of target fields
+        :param values: iterable collection of target values
+        :return:
+        """
         f_names = []
         f_values = []
         for f, v in zip(fields, _internal.proper_values(values)):
@@ -63,20 +107,47 @@ class DBase:
         self._db_connection.commit()
 
     def has_tables(self, tables: Iterable[Union[str, '_Table.Table']]) -> bool:
+        """
+        Check if all given tables are present in database.
+
+        :param tables: iterable collection of string table names or of Table objects to check
+        :return: True if all tables are present
+        """
         for table in tables:
             if not self.has_table(table):
                 return False
         return True
 
     def has_table(self, table_name: Union[str,'_Table.Table']) -> bool:
+        """
+        Check if given table is present in database.
+
+        :param table_name: string name of table of Table object to check
+        :return: True if table is present
+        """
         table_name = table_name if isinstance(table_name, str) else table_name.name
         return table_name in self._db_tables
 
     def get_tables(self) -> set[str]:
+        """
+        Get all tables from database with SQL query.
+
+        :return: set of table names
+        """
         tables = self.query('SELECT name from sqlite_master where type="table"').fetchall()
         return set(t[0] for t in tables)
 
     def get_fields(self, table: str) -> dict[str, '_Table.TableField']:
+        """
+        Get fields for of given table.
+
+        If table is not present, exception will be thrown.
+
+        Also, when call this method, table will be registered in DBase and Table object for given table will be created.
+
+        :param table: string name of table as it is in database.
+        :return: dict of {field_name: TableField object}
+        """
         if not self.has_table(table):
             raise _exceptions.TableNotFound(table, self.name)
 
@@ -84,6 +155,16 @@ class DBase:
         return self.table_fields(table)
 
     def get_foreign_keys(self, table: str) -> dict[str, '_Table.TableFK']:
+        """
+        Get foreign keys of given table.
+
+        If table is not present, exception will be thrown.
+
+        Also, when call this method, table will be registered in DBase and Table object for given table will be created.
+
+        :param table: table string name as it is in base.
+        :return: dict of {field_name: TableFK}
+        """
         if not self.has_table(table):
             raise _exceptions.TableNotFound(table, self.name)
 
@@ -91,20 +172,48 @@ class DBase:
         return self.table_foreign_keys(table)
 
     def table_satisfied(self, table: '_Table.Table') -> bool:
+        """
+        Check if all tables binded to some Table object are present in database.
+
+        Useful for non-real Tables.
+
+        :param table: Table object reference.
+        :return: True if all binded tables are present in base.
+        """
         return self.has_tables(table.binded)
 
     def tables_satified(self, tables: Iterable['_Table.Table']) -> bool:
+        """
+        Check if all tables binded to all given Table objects are present in database.
+
+        Useful for non-real Tables.
+
+        :param tables: Iterable of Table object references.
+        :return: True if all binded tables for all given Table objects are present in base.
+        """
         for t in tables:
             return self.table_satisfied(t)
         return True
 
     def table_fields(self, table: '_Table.Table') -> dict[str, '_Table.TableField']:
+        """
+        Get fields for of given table.
+
+        :param table: Table reference object.
+        :return: dict of {field_name: TableField object}
+        """
         result = self.query(f'PRAGMA table_info({table.query})').fetchall()
         fields = dict((f"{table.name}.{name}", _Table.TableField(i, name, typ, table, is_primary=(pk != 0))) for i,name,typ,_,_,pk in result)
 
         return fields
 
     def table_foreign_keys(self, table: '_Table.Table') -> dict[str, '_Table.TableFK']:
+        """
+        Get foreign keys for of given table.
+
+        :param table: Table reference object.
+        :return: dict of {field_name: TableFK object}
+        """
         result = self.query(f'PRAGMA foreign_key_list({table.query})').fetchall()
         keys = dict()
 
@@ -117,14 +226,17 @@ class DBase:
 
     @property
     def name(self) -> str:
+        """Name of current DBase's file."""
         return self._db_file
 
     @property
     def tables(self) -> set[str]:
+        """All tables present in current DBase's file."""
         return self._db_tables
 
     @property
     def active_tables(self) -> dict[str, '_Table.Table']:
+        """All Table objects initialized within DBase."""
         return self._active_tables.copy()
 
     def __repr__(self) -> str:

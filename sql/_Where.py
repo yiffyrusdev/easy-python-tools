@@ -4,6 +4,7 @@ import sql._Table as _Table
 
 
 class Where:
+    """Where base class for all selection conditions."""
     _operator = "????"
 
     def __init__(self, field1: '_Table.TableField', field2: '_Table.TableField'):
@@ -21,18 +22,22 @@ class Where:
 
 
 class WhereEq(Where):
+    """Selection condition on equality ="""
     _operator = "="
 
 
 class WhereGt(Where):
+    """Selection condition on greater >"""
     _operator = ">"
 
 
 class WhereLt(Where):
+    """Selection condition on less <"""
     _operator = "<"
 
 
 class WhereComposition(Where):
+    """WhereComposition base class for compositions os Where objects."""
     _operator = "????"
 
     def __init__(self, *wheres: Union[Where, 'WhereComposition']):
@@ -43,8 +48,10 @@ class WhereComposition(Where):
 
 
 class WhereAND(WhereComposition):
+    """Compose two Where objects with AND"""
     _operator = "AND"
 
 
 class WhereOR(WhereComposition):
+    """Compose two Where objets with OR"""
     _operator = "OR"

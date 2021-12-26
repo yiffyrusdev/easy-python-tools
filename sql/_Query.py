@@ -10,6 +10,9 @@ class UpdateQuery:
 
 
 class SelectQuery:
+    """
+    SelectQuery object to perform SELECT queries and its compositions.
+    """
     def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: '_Where.Where' = None, distinct=False, union_comparator: '_Where.WhereComposition' = None):
         self._source = source
         self._fields = tuple(fields)
@@ -20,29 +23,43 @@ class SelectQuery:
 
     @property
     def source(self) -> '_Table.Table':
+        """Source Table object to SELECT from."""
         return self._source
 
     @property
     def fields(self) -> tuple['_Table.TableField']:
+        """Fields used in current selection."""
         return self._fields
 
     @property
     def body(self):
+        """Last query operation result. Used for caching."""
         return self._body
 
     @property
     def distinct(self) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy of current, but selection will be DISTINCT."""
         return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=True)
 
     @property
     def OR(self) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy of current, but newly added selection conditions will be added with OR."""
         return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=self._distinct, union_comparator=_Where.WhereOR)
 
     @property
     def AND(self) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy of current, but newly added selection conditions will be added with AND."""
         return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=self._distinct, union_comparator=_Where.WhereAND)
 
     def new_with_where(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
+        """
+        Make new SelectQuery, which is copy of current, but add new selection condition.
+
+        :param values: condition description.
+        :param comparison: Where class reference which represents how values would be checked.
+        :param union: WhereComposition class reference which represents how all checks will be composited.
+        :return: new SelectQuery object.
+        """
         if isinstance(values, list):
             where_type = _Where.WhereAND
         elif isinstance(values, tuple):
@@ -68,15 +85,24 @@ class SelectQuery:
         return SelectQuery(self.source, self.fields, where=where, distinct=self._distinct)
 
     def __eq__(self, values: list | tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy o current, but with additional selection condition on equalities."""
         return self.new_with_where(values, _Where.WhereEq, self._union_comparator)
 
     def __gt__(self, values: list | tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy o current, but with additional selection condition on greaters."""
         return self.new_with_where(values, _Where.WhereGt, self._union_comparator)
 
     def __lt__(self, values: list | tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy o current, but with additional selection condition on lessers."""
         return self.new_with_where(values, _Where.WhereLt, self._union_comparator)
 
-    def __call__(self, force=False):
+    def __call__(self, force=False) -> list[tuple]:
+        """
+        Get result of SQL query, which is presented by current object.
+
+        :param force: True means not to use last cached result.
+        :return: select SQL query result or last cached result.
+        """
         if (self.body is None) or force:
             query = str(self)
             self._body = self.source.db.query(query, commit=False).fetchall()
