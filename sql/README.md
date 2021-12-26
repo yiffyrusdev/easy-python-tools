@@ -174,6 +174,17 @@ printers_vendors
 Table<Printers_INNER_Vendors of tests/sql_test.sql, Composition>
 ```
 ```python
+printers_vendors.fields
+```
+```python
+{'Printers.id': Field<0, id, INTEGER of Table<Printers of tests/sql_test.sql, Real>>,
+ 'Printers.name': Field<1, name, varchar(20) of Table<Printers of tests/sql_test.sql, Real>>,
+ 'Printers.vendor_id': Field<2, vendor_id, INTEGER of Table<Printers of tests/sql_test.sql, Real>>,
+ 'Vendors.id': Field<0, id, INTEGER of Table<Vendors of tests/sql_test.sql, Real>>,
+ 'Vendors.name': Field<1, name, varchar(20) of Table<Vendors of tests/sql_test.sql, Real>>,
+ 'Vendors.country': Field<2, country, varchar(20) of Table<Vendors of tests/sql_test.sql, Real>>}
+```
+```python
 printers_vendors[:]()
 ```
 
@@ -195,6 +206,17 @@ printers_vendors
 ```
 ```python
 Table<Printers_LEFT_Vendors of tests/sql_test.sql, Composition>
+```
+```python
+printers_vendors.fields
+```
+```python
+{'Printers.id': Field<0, id, INTEGER of Table<Printers of tests/sql_test.sql, Real>>,
+ 'Printers.name': Field<1, name, varchar(20) of Table<Printers of tests/sql_test.sql, Real>>,
+ 'Printers.vendor_id': Field<2, vendor_id, INTEGER of Table<Printers of tests/sql_test.sql, Real>>,
+ 'Vendors.id': Field<0, id, INTEGER of Table<Vendors of tests/sql_test.sql, Real>>,
+ 'Vendors.name': Field<1, name, varchar(20) of Table<Vendors of tests/sql_test.sql, Real>>,
+ 'Vendors.country': Field<2, country, varchar(20) of Table<Vendors of tests/sql_test.sql, Real>>}
 ```
 ```python
 printers_vendors[:]()
