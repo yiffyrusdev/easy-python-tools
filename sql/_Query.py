@@ -10,12 +10,13 @@ class UpdateQuery:
 
 
 class SelectQuery:
-    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: _Where.Where = None, distinct=False):
+    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: '_Where.Where' = None, distinct=False, union_comparator: '_Where.WhereComposition' = None):
         self._source = source
         self._fields = tuple(fields)
         self._distinct = distinct
         self._where = where
         self._body = None
+        self._union_comparator = _Where.WhereAND if union_comparator is None else union_comparator
 
     @property
     def source(self) -> '_Table.Table':
@@ -32,6 +33,14 @@ class SelectQuery:
     @property
     def distinct(self) -> 'SelectQuery':
         return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=True)
+
+    @property
+    def OR(self) -> 'SelectQuery':
+        return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=self._distinct, union_comparator=_Where.WhereOR)
+
+    @property
+    def AND(self) -> 'SelectQuery':
+        return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=self._distinct, union_comparator=_Where.WhereAND)
 
     def new_with_where(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
         if isinstance(values, list):
@@ -59,13 +68,13 @@ class SelectQuery:
         return SelectQuery(self.source, self.fields, where=where, distinct=self._distinct)
 
     def __eq__(self, values: list | tuple) -> 'SelectQuery':
-        return self.new_with_where(values, _Where.WhereEq, _Where.WhereAND)
+        return self.new_with_where(values, _Where.WhereEq, self._union_comparator)
 
     def __gt__(self, values: list | tuple) -> 'SelectQuery':
-        return self.new_with_where(values, _Where.WhereGt, _Where.WhereAND)
+        return self.new_with_where(values, _Where.WhereGt, self._union_comparator)
 
     def __lt__(self, values: list | tuple) -> 'SelectQuery':
-        return self.new_with_where(values, _Where.WhereLt, _Where.WhereAND)
+        return self.new_with_where(values, _Where.WhereLt, self._union_comparator)
 
     def __call__(self, force=False):
         if (self.body is None) or force:

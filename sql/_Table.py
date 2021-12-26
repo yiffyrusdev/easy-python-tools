@@ -24,6 +24,9 @@ class Table:
         for f, fk in self.foreign_keys.items():
             self._foreign_tables.add(fk.master_field.table)
 
+        for field in self.fields.values():
+            self.__dict__.update({f'f_{field.name}': field})
+
     def field_by_name(self, field_name: str) -> 'TableField':
         """
         Get TableField reference by field_name from this Table.
