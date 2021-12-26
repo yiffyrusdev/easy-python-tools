@@ -19,19 +19,19 @@ SELECT
 ```
 
 ## Quick Start
-###1. Find or create your SQLite dababase file
+### 1. Find or create your SQLite dababase file
 ```python
 from sql import DBase
 
 your_base = DBase("tests/sql_test.sql")
 ```
 
-###2. Get existing tables names
+### 2. Get existing tables names
 ```python
 your_base.tables
 ```
 
-###3. Create new table
+### 3. Create new table
 create table schema
 >Let us imagine that there is already Vendors table with primary key 'id'
 ```python
@@ -55,7 +55,7 @@ printers
 Table<Printers of tests/sql_test.sql>
 ```
 
-###4. Get existing table from base
+### 4. Get existing table from base
 ```python
 vendors = your_base.table("Vendors")
 ```
@@ -67,7 +67,7 @@ vendors
 Table<Vendors of tests/sql_test.sql>
 ```
 
-###5. Get information about table
+### 5. Get information about table
 ```python
 printers.fields
 ```
@@ -97,7 +97,7 @@ printers.foreign_tables
 }
 ```
 
-###6. Add rows to table
+### 6. Add rows to table
 ```python
 printers << {"name":"Canon L100", "vendor_id": 1}
 printers << {"name":"Canon L200", "vendor_id": 1}
