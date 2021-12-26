@@ -2,11 +2,39 @@ from typing import Iterable, Union
 import sql._Table as _Table
 import sql._Where as _Where
 import sql._internal as _internal
+import sql._exceptions as _exceptions
 
 
 class UpdateQuery:
+    """
+    UpdateQuert object to perform update on table.
+    """
     def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: '_Where.Where' = None):
-        pass
+        self._target = target
+        self._fields = fields
+        self._values = values
+        self._where = where
+
+        if (not self._target.is_real) and (self._where is not None):
+            raise _exceptions.TableIsNotReal(self._target.name)
+
+    def __call__(self, commit=True) -> None:
+        """
+        Make SQL UPDATE Query, which is presented by current object.
+
+        :param commit: True means to commit changes to database after query success.
+        """
+        query = str(self)
+        self._target.db.query(query, commit=commit)
+
+    def __str__(self) -> str:
+        update = f'''UPDATE
+        {self._target.name} SET {",".join(f.name for f in self._fields)} = ({",".join(_internal.proper_values(self._values))})
+        {"WHERE"+str(self._where) if self._where is not None else "" };'''
+        return update
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class SelectQuery:
@@ -96,6 +124,10 @@ class SelectQuery:
         """Make new SelectQuery, which is copy o current, but with additional selection condition on lessers."""
         return self.new_with_where(values, _Where.WhereLt, self._union_comparator)
 
+    def __lshift__(self, values: tuple) -> 'UpdateQuery':
+        """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
+        return UpdateQuery(self._source, self._fields, values, where=self._where)
+
     def __call__(self, force=False) -> list[tuple]:
         """
         Get result of SQL query, which is presented by current object.
@@ -105,7 +137,7 @@ class SelectQuery:
         """
         if (self.body is None) or force:
             query = str(self)
-            self._body = self.source.db.query(query, commit=False).fetchall()
+            self._body = self._source.db.query(query, commit=False).fetchall()
 
         return self.body
 

@@ -191,18 +191,6 @@ class Table:
 
         return _Query.SelectQuery(self, fields)
 
-    def __setitem__(self, field_names: tuple, values: tuple) -> '_Query.UpdateQuery':
-        """
-        Create UpdateQuery for Table.
-
-        Only Real Tables supported.
-
-        :param field_names: fields to update.
-        :param values: values for fields.
-        :return: new UpdateQuery
-        """
-        raise NotImplementedError()
-
     def __mul__(self, other: 'Table') -> 'Table':
         """
         Make cartisian prodyts of tables.
