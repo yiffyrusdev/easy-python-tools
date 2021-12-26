@@ -1,4 +1,4 @@
-from typing import Iterable, Union
+from typing import Iterable, Union, Type
 import sql._Table as _Table
 import sql._Where as _Where
 import sql._internal as _internal
@@ -9,7 +9,7 @@ class UpdateQuery:
     """
     UpdateQuert object to perform update on table.
     """
-    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: '_Where.Where' = None):
+    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: Type['_Where.Where'] = None):
         self._target = target
         self._fields = fields
         self._values = values
@@ -41,13 +41,32 @@ class SelectQuery:
     """
     SelectQuery object to perform SELECT queries and its compositions.
     """
-    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: '_Where.Where' = None, distinct=False, union_comparator: '_Where.WhereComposition' = None):
+    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: Type['_Where.Where'] = None):
         self._source = source
         self._fields = tuple(fields)
-        self._distinct = distinct
+        self._distinct = False
         self._where = where
         self._body = None
-        self._union_comparator = _Where.WhereAND if union_comparator is None else union_comparator
+        self._union_comparator = _Where.WhereAND
+
+
+    @property
+    def union_comparator(self) -> Type['_Where.WhereComposition']:
+        """Comparator type which will be used on further conditions composition for this query."""
+        return self._union_comparator
+
+    @union_comparator.setter
+    def union_comparator(self, value: Type['_Where.WhereComposition']):
+        self._union_comparator = value
+
+    @property
+    def is_distinct(self) -> bool:
+        """Is this query DISTINCT or not."""
+        return self._distinct
+
+    @is_distinct.setter
+    def is_distinct(self, value: bool):
+        self._distinct = value
 
     @property
     def source(self) -> '_Table.Table':
@@ -67,17 +86,25 @@ class SelectQuery:
     @property
     def distinct(self) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but selection will be DISTINCT."""
-        return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=True)
+        query = SelectQuery(self.source, fields=self.fields, where=self._where)
+        query.is_distinct = True
+        return query
 
     @property
     def OR(self) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but newly added selection conditions will be added with OR."""
-        return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=self._distinct, union_comparator=_Where.WhereOR)
+        query = SelectQuery(self.source, fields=self.fields, where=self._where)
+        query.is_distinct = self._distinct
+        query.union_comparator = _Where.WhereOR
+        return query
 
     @property
     def AND(self) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but newly added selection conditions will be added with AND."""
-        return SelectQuery(self.source, fields=self.fields, where=self._where, distinct=self._distinct, union_comparator=_Where.WhereAND)
+        query = SelectQuery(self.source, fields=self.fields, where=self._where)
+        query.is_distinct = self._distinct
+        query.union_comparator = _Where.WhereAND
+        return query
 
     def new_with_where(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
         """
@@ -110,7 +137,9 @@ class SelectQuery:
 
         where = union(self._where,where_type(*new_wheres)) if self._where is not None else where_type(*new_wheres)
 
-        return SelectQuery(self.source, self.fields, where=where, distinct=self._distinct)
+        query = SelectQuery(self.source, self.fields, where=where)
+        query.is_distinct = self._distinct
+        return query
 
     def __eq__(self, values: list | tuple) -> 'SelectQuery':
         """Make new SelectQuery, which is copy o current, but with additional selection condition on equalities."""
