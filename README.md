@@ -18,11 +18,12 @@ Any help and criticism is greatly appreciated.
 
 ## Roadmap
 - **SQL shit (Oh God. PYTHON ONLY)** [see docs](./sql/README.md)
-  - [ ] Basic Table operations
+  - [x] Basic Table operations
     - [x] Single table CREATE
     - [x] Single table INSERT
     - [x] Single table SELECT
-    - [ ] Single table UPDATE
+    - [x] Single table UPDATE
+    - [x] GROUP BY expressions
   - [x] Basic Table compositions
     - [x] Automatical INNER JOIN on foreign keys
     - [x] Cartesian product
