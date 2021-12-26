@@ -9,11 +9,12 @@ class UpdateQuery:
     """
     UpdateQuert object to perform update on table.
     """
-    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: Type['_Where.Where'] = None):
+    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: Type['_Where.Where'] = None, group: tuple['_Table.TableField'] = ()):
         self._target = target
         self._fields = fields
         self._values = values
         self._where = where
+        self._group = group
 
         if (not self._target.is_real) and (self._where is not None):
             raise _exceptions.TableIsNotReal(self._target.name)
@@ -29,9 +30,10 @@ class UpdateQuery:
 
     def __str__(self) -> str:
         update = f'''UPDATE
-        {self._target.name} SET {",".join(f.name for f in self._fields)} = ({",".join(_internal.proper_values(self._values))})
-        {"WHERE"+str(self._where) if self._where is not None else "" };'''
-        return update
+        {self._target.name} SET {",".join(f.name for f in self._fields)} = ({",".join(_internal.proper_values(self._values))})'''
+        where = f' WHERE {self._where}' if self._where is not None else ""
+        group = f' GROUP BY {",".join(f.full_name for f in self._group)}' if self._group else ""
+        return f'{update}{where}{group};'
 
     def __repr__(self) -> str:
         return str(self)
@@ -41,14 +43,14 @@ class SelectQuery:
     """
     SelectQuery object to perform SELECT queries and its compositions.
     """
-    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: Type['_Where.Where'] = None):
+    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: Type['_Where.Where'] = None, group: tuple['_Table.TableField'] = ()):
         self._source = source
         self._fields = tuple(fields)
         self._distinct = False
         self._where = where
         self._body = None
         self._union_comparator = _Where.WhereAND
-
+        self._group = group
 
     @property
     def union_comparator(self) -> Type['_Where.WhereComposition']:
@@ -142,20 +144,27 @@ class SelectQuery:
         return query
 
     def __eq__(self, values: list | tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which is copy o current, but with additional selection condition on equalities."""
+        """Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
         return self.new_with_where(values, _Where.WhereEq, self._union_comparator)
 
     def __gt__(self, values: list | tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which is copy o current, but with additional selection condition on greaters."""
+        """Make new SelectQuery, which is copy of current, but with additional selection condition on greaters."""
         return self.new_with_where(values, _Where.WhereGt, self._union_comparator)
 
     def __lt__(self, values: list | tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which is copy o current, but with additional selection condition on lessers."""
+        """Make new SelectQuery, which is copy of current, but with additional selection condition on lessers."""
         return self.new_with_where(values, _Where.WhereLt, self._union_comparator)
+
+    def __mod__(self, values: tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which copy of current, but with grouping fields."""
+        fields = tuple(self._source.field_by_name(v) for v in values)
+        return SelectQuery(self._source, self._fields, self._where, fields)
 
     def __lshift__(self, values: tuple) -> 'UpdateQuery':
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
-        return UpdateQuery(self._source, self._fields, values, where=self._where)
+        if (lv := len(values)) != (lf := len(self._fields)):
+            raise ValueError(f'All fields from selection have to be initialized in UPDATE query, but only {lv} of {lf} are.')
+        return UpdateQuery(self._source, self._fields, values, where=self._where, group=self._group)
 
     def __call__(self, force=False) -> list[tuple]:
         """
@@ -174,9 +183,10 @@ class SelectQuery:
         select = f'''SELECT {"DISTINCT" if self._distinct else ""}
         {",".join(f.full_name for f in self.fields)} 
         FROM {self.source.query}'''
-        where = f'WHERE {self._where}' if self._where is not None else ""
+        where = f' WHERE {self._where}' if self._where is not None else ""
+        group = f' GROUP BY {",".join(f.full_name for f in self._group)}' if self._group else ""
 
-        query = f'{select} {where};'
+        query = f'{select}{where}{group};'
         return query
 
     def __repr__(self) -> str:
