@@ -17,7 +17,7 @@ If you find this code useful, I will be glad if you use it in your GPL3-compatib
 Any help and criticism is greatly appreciated.
 
 ## Roadmap
-- **SQL shit (Oh God. PYTHON ONLY)**
+- **SQL shit (Oh God. PYTHON ONLY)** [see docs](./sql/README.md)
   - [ ] Basic Table operations
     - [x] Single table CREATE
     - [x] Single table INSERT
