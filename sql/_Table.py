@@ -303,7 +303,7 @@ class Table:
         self.db.insert(self.name, fields, values)
 
     def __repr__(self) -> str:
-        return f'Table<{self.name} of {self.db.name}>'
+        return f'Table<{self.name} of {self.db.name}, {"Real" if self.is_real else "Composition"}>'
 
     def __eq__(self, other: 'Table'):
         return (self.query == other.query) and (self.db.name == other.db.name)

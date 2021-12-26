@@ -64,7 +64,7 @@ Now the 'vendors' variable references to 'Table' object that provides all the SQ
 vendors
 ```
 ```python
-Table<Vendors of tests/sql_test.sql>
+Table<Vendors of tests/sql_test.sql, Real>
 ```
 
 ### 5. Get information about table
@@ -73,9 +73,9 @@ printers.fields
 ```
 ```python
 {
-    'Printers.id': Field<0, id, INTEGER of Table<Printers of tests/sql_test.sql>>,
-    'Printers.name': Field<1, name, varchar(20) of Table<Printers of tests/sql_test.sql>>,
-    'Printers.vendor_id': Field<2, vendor_id, INTEGER of Table<Printers of tests/sql_test.sql>>
+    'Printers.id': Field<0, id, INTEGER of Table<Printers of tests/sql_test.sql, Real>>,
+    'Printers.name': Field<1, name, varchar(20) of Table<Printers of tests/sql_test.sql, Real>>,
+    'Printers.vendor_id': Field<2, vendor_id, INTEGER of Table<Printers of tests/sql_test.sql, Real>>
 }
 ```
 ---
@@ -84,7 +84,7 @@ printers.foreign_keys
 ```
 ```python
 {
-    'Printers.vendor_id': TableFK<Field<2, vendor_id, INTEGER of Table<Printers of tests/sql_test.sql>> -> Field<0, id, INTEGER of Table<Vendors of tests/sql_test.sql>>>
+    'Printers.vendor_id': TableFK<Field<2, vendor_id, INTEGER of Table<Printers of tests/sql_test.sql, Real>> -> Field<0, id, INTEGER of Table<Vendors of tests/sql_test.sql, Real>>>
 }
 ```
 ---
@@ -93,7 +93,7 @@ printers.foreign_tables
 ```
 ```python
 {
-    Table<Vendors of tests/sql_test.sql>
+    Table<Vendors of tests/sql_test.sql, Real>
 }
 ```
 
@@ -142,7 +142,7 @@ printers_vendors = printers * vendors
 printers_vendors
 ```
 ```python
-Table<Printers_x_Vendors of tests/sql_test.sql>
+Table<Printers_x_Vendors of tests/sql_test.sql, Composition>
 ```
 ```python
 printers_vendors[:]()
@@ -171,7 +171,7 @@ printers_vendors = printers.join(vendors, 'INNER', printers.f_vendor_id, vendors
 printers_vendors
 ```
 ```python
-Table<Printers_INNER_Vendors of tests/sql_test.sql>
+Table<Printers_INNER_Vendors of tests/sql_test.sql, Composition>
 ```
 ```python
 printers_vendors[:]()
@@ -194,7 +194,7 @@ printers_vendors = vendors.join(printers, 'LEFT', printers.f_id, printers.f_vend
 printers_vendors
 ```
 ```python
-Table<Printers_LEFT_Vendors of tests/sql_test.sql>
+Table<Printers_LEFT_Vendors of tests/sql_test.sql, Composition>
 ```
 ```python
 printers_vendors[:]()
@@ -229,7 +229,7 @@ F.ex:
 printers.f_name
 ```
 ```python
-Field<1, name, varchar(20) of Table<Printers of tests/sql_test.sql>>
+Field<1, name, varchar(20) of Table<Printers of tests/sql_test.sql, Real>>
 ```
 If your field name is, f.ex, "f_count", access it this way:
 ```python
