@@ -195,18 +195,17 @@ class SelectQuery:
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
         return self.UPDATE(values)
 
-    def __call__(self, force=False) -> list[tuple]:
+    def __call__(self) -> list[tuple]:
         """
         Get result of SQL query, which is presented by current object.
 
         :param force: True means not to use last cached result.
         :return: select SQL query result or last cached result.
         """
-        if (self.body is None) or force:
-            query = str(self)
-            self._body = self._source.db.query(query, commit=False).fetchall()
+        query = str(self)
+        self._body = self._source.db.query(query, commit=False).fetchall()
 
-        return self.body
+        return self._body
 
     def __str__(self):
         select = f'''SELECT {"DISTINCT" if self._distinct else ""}
