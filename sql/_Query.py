@@ -117,7 +117,7 @@ class SelectQuery:
         query.union_comparator = _Where.WhereAND
         return query
 
-    def new_with_where(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
+    def WHERE(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
         """
         Make new SelectQuery, which is copy of current, but add new selection condition.
 
@@ -152,28 +152,48 @@ class SelectQuery:
         query.is_distinct = self._distinct
         return query
 
-    def __eq__(self, values: list | tuple) -> 'SelectQuery':
+    def WHERE_EQ(self, values: list | tuple) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
-        return self.new_with_where(values, _Where.WhereEq, self._union_comparator)
+        return self.WHERE(values, _Where.WhereEq, self._union_comparator)
 
-    def __gt__(self, values: list | tuple) -> 'SelectQuery':
+    def WHERE_GT(self, values: list | tuple) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but with additional selection condition on greaters."""
-        return self.new_with_where(values, _Where.WhereGt, self._union_comparator)
+        return self.WHERE(values, _Where.WhereGt, self._union_comparator)
 
-    def __lt__(self, values: list | tuple) -> 'SelectQuery':
+    def WHERE_LT(self, values: list | tuple) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but with additional selection condition on lessers."""
-        return self.new_with_where(values, _Where.WhereLt, self._union_comparator)
+        return self.WHERE(values, _Where.WhereLt, self._union_comparator)
 
-    def __mod__(self, values: tuple) -> 'SelectQuery':
+    def GROUPBY(self, fields: tuple) -> 'SelectQuery':
         """Make new SelectQuery, which copy of current, but with grouping fields."""
-        fields = tuple(self._source.field_by_name(v) for v in values)
+        fields = tuple(self._source.field_by_name(v) for v in fields)
         return SelectQuery(self._source, self._fields, self._where, fields)
 
-    def __lshift__(self, values: tuple | dict) -> 'UpdateQuery':
+    def UPDATE(self, values: tuple | list) -> 'UpdateQuery':
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
         if not isinstance(values, dict) and ((lv := len(values)) != (lf := len(self._fields))):
             raise ValueError(f'All fields from selection have to be initialized in UPDATE query, but only {lv} of {lf} are.')
         return UpdateQuery(self._source, self._fields, values, where=self._where, group=self._group)
+
+    def __eq__(self, values: list | tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
+        return self.WHERE_EQ(values)
+
+    def __gt__(self, values: list | tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy of current, but with additional selection condition on greaters."""
+        return self.WHERE_GT(values)
+
+    def __lt__(self, values: list | tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which is copy of current, but with additional selection condition on lessers."""
+        return self.WHERE_LT(values)
+
+    def __mod__(self, fields: tuple) -> 'SelectQuery':
+        """Make new SelectQuery, which copy of current, but with grouping fields."""
+        return self.GROUPBY(fields)
+
+    def __lshift__(self, values: tuple | dict) -> 'UpdateQuery':
+        """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
+        return self.UPDATE(values)
 
     def __call__(self, force=False) -> list[tuple]:
         """
