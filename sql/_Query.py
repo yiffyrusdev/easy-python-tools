@@ -9,7 +9,7 @@ class UpdateQuery:
     """
     UpdateQuert object to perform update on table.
     """
-    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: Iterable, where: Type['_Where.Where'] = None, group: tuple['_Table.TableField'] = ()):
+    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: tuple | dict, where: Type['_Where.Where'] = None, group: tuple['_Table.TableField'] = ()):
         self._target = target
         self._fields = fields
         self._values = values
@@ -29,8 +29,17 @@ class UpdateQuery:
         self._target.db.query(query, commit=commit)
 
     def __str__(self) -> str:
+        if isinstance(self._values, tuple):
+            fields = (f.name for f in self._fields)
+            values = self._values
+        elif isinstance(self._values, dict):
+            fields = (self._target.field_by_name(f).name for f in self._values.keys())
+            values = self._values.values()
+        else:
+            raise TypeError(f'expected <dict> or <tuple> for value assignment, got {type(self._values)}')
+
         update = f'''UPDATE
-        {self._target.name} SET {",".join(f.name for f in self._fields)} = ({",".join(_internal.proper_values(self._values))})'''
+        {self._target.name} SET {",".join(fields)} = ({",".join(_internal.proper_values(values))})'''
         where = f' WHERE {self._where}' if self._where is not None else ""
         group = f' GROUP BY {",".join(f.full_name for f in self._group)}' if self._group else ""
         return f'{update}{where}{group};'
@@ -160,9 +169,9 @@ class SelectQuery:
         fields = tuple(self._source.field_by_name(v) for v in values)
         return SelectQuery(self._source, self._fields, self._where, fields)
 
-    def __lshift__(self, values: tuple) -> 'UpdateQuery':
+    def __lshift__(self, values: tuple | dict) -> 'UpdateQuery':
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
-        if (lv := len(values)) != (lf := len(self._fields)):
+        if not isinstance(values, dict) and ((lv := len(values)) != (lf := len(self._fields))):
             raise ValueError(f'All fields from selection have to be initialized in UPDATE query, but only {lv} of {lf} are.')
         return UpdateQuery(self._source, self._fields, values, where=self._where, group=self._group)
 

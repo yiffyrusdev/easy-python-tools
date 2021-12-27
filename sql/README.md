@@ -342,3 +342,24 @@ q()
 ```python
 [(2, 'Lada'), (3, 'KAMAZ')]
 ```
+
+### 11. Update values in table
+
+As for now, UPDATE operation is very similar to SELECT: you have to select rows to update and specify fields to update in selected rows.
+
+So, update syntax is very similar to insert syntax, just for SelectQuery instead of Table:
+```python
+# Update values with tuple. You must specify all values in same order as they are in selection:
+(vendors['name'] == ("Tayouta",)) << ("Tamoyo",)
+
+# Wrong assignment type, throws exception:
+vendors['id'] == (10,)) << ("Tamoyo",) # Exception
+# Wrong assignment shape, throws exception:
+vendors['id', 'name'] == ((10, 2),)) << ("Tamoyo",) # Exception
+# Gaps are NOT SUPPORTED due to a logical deviation of operation:
+vendors['id', 'name'] == ((10, 2),)) << ((), "Tamoyo",) # Excption
+
+# Update values with dict. You can specify any field assignment:
+(vendors['id'] == ((2, 3),)) << {"name": "Tamoyo"}
+(vendors['id', 'name'] == ((2, 3),)) << {"name": "Tamoyo"}
+```
