@@ -9,15 +9,18 @@ class UpdateQuery:
     """
     UpdateQuert object to perform update on table.
     """
-    def __init__(self, target: '_Table.Table', fields: Iterable['_Table.TableField'], values: tuple | dict, where: Type['_Where.Where'] = None, group: tuple['_Table.TableField'] = ()):
-        self._target = target
-        self._fields = fields
+    def __init__(self, selection: 'SelectQuery', values: tuple | dict):
+        self._target = selection.source
+        self._fields = selection.fields
         self._values = values
-        self._where = where
-        self._group = group
+        self._where = selection.where_condition
+        self._group = selection.group_fields
 
         if (not self._target.is_real) and (self._where is not None):
             raise _exceptions.TableIsNotReal(self._target.name)
+
+        if not isinstance(values, dict) and ((lv := len(values)) != (lf := len(self._fields))):
+            raise ValueError(f'All fields from selection have to be initialized in UPDATE query, but only {lv} of {lf} are.')
 
     def __call__(self, commit=True) -> None:
         """
@@ -52,32 +55,38 @@ class SelectQuery:
     """
     SelectQuery object to perform SELECT queries and its compositions.
     """
-    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField'], where: Type['_Where.Where'] = None, group: tuple['_Table.TableField'] = ()):
+    def __init__(self, source: '_Table.Table', fields: Iterable['_Table.TableField']):
         self._source = source
         self._fields = tuple(fields)
         self._distinct = False
-        self._where = where
+        self._where = None
         self._body = None
         self._union_comparator = _Where.WhereAND
-        self._group = group
+        self._group: tuple['_Table.TableField'] = tuple()
+        self._order: tuple['_Table.TableField'] = tuple()
+
 
     @property
     def union_comparator(self) -> Type['_Where.WhereComposition']:
         """Comparator type which will be used on further conditions composition for this query."""
         return self._union_comparator
 
-    @union_comparator.setter
-    def union_comparator(self, value: Type['_Where.WhereComposition']):
-        self._union_comparator = value
-
     @property
     def is_distinct(self) -> bool:
         """Is this query DISTINCT or not."""
         return self._distinct
 
-    @is_distinct.setter
-    def is_distinct(self, value: bool):
-        self._distinct = value
+    @property
+    def where_condition(self) -> Type['_Where.Where']:
+        return self._where
+
+    @property
+    def group_fields(self) -> tuple['_Table.TableField']:
+        return self._group
+
+    @property
+    def order_fields(self) -> tuple['_Table.TableField']:
+        return self._order
 
     @property
     def source(self) -> '_Table.Table':
@@ -97,25 +106,23 @@ class SelectQuery:
     @property
     def distinct(self) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but selection will be DISTINCT."""
-        query = SelectQuery(self.source, fields=self.fields, where=self._where)
-        query.is_distinct = True
-        return query
+        new = self.copy()
+        new._distinct = True
+        return new
 
     @property
     def OR(self) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but newly added selection conditions will be added with OR."""
-        query = SelectQuery(self.source, fields=self.fields, where=self._where)
-        query.is_distinct = self._distinct
-        query.union_comparator = _Where.WhereOR
-        return query
+        new = self.copy()
+        new._union_comparator = _Where.WhereOR
+        return new
 
     @property
     def AND(self) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but newly added selection conditions will be added with AND."""
-        query = SelectQuery(self.source, fields=self.fields, where=self._where)
-        query.is_distinct = self._distinct
-        query.union_comparator = _Where.WhereAND
-        return query
+        new = self.copy()
+        new._union_comparator = _Where.WhereAND
+        return new
 
     def WHERE(self, values: list | tuple, comparison: type, union: type) -> 'SelectQuery':
         """
@@ -148,9 +155,9 @@ class SelectQuery:
 
         where = union(self._where,where_type(*new_wheres)) if self._where is not None else where_type(*new_wheres)
 
-        query = SelectQuery(self.source, self.fields, where=where)
-        query.is_distinct = self._distinct
-        return query
+        new = self.copy()
+        new._where = where
+        return new
 
     def WHERE_EQ(self, values: list | tuple) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
@@ -167,13 +174,19 @@ class SelectQuery:
     def GROUPBY(self, fields: tuple) -> 'SelectQuery':
         """Make new SelectQuery, which copy of current, but with grouping fields."""
         fields = tuple(self._source.field_by_name(v) for v in fields)
-        return SelectQuery(self._source, self._fields, self._where, fields)
+        new = self.copy()
+        new._group = fields
+        return new
+
+    def ORDERBY(self, fields: tuple) -> 'SelectQuery':
+        fields = tuple(self._source.field_by_name(v) for v in fields)
+        new = self.copy()
+        new._order = fields
+        return new
 
     def UPDATE(self, values: tuple | list) -> 'UpdateQuery':
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
-        if not isinstance(values, dict) and ((lv := len(values)) != (lf := len(self._fields))):
-            raise ValueError(f'All fields from selection have to be initialized in UPDATE query, but only {lv} of {lf} are.')
-        return UpdateQuery(self._source, self._fields, values, where=self._where, group=self._group)
+        return UpdateQuery(self, values)
 
     def __eq__(self, values: list | tuple) -> 'SelectQuery':
         """Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
@@ -199,7 +212,6 @@ class SelectQuery:
         """
         Get result of SQL query, which is presented by current object.
 
-        :param force: True means not to use last cached result.
         :return: select SQL query result or last cached result.
         """
         query = str(self)
@@ -219,3 +231,13 @@ class SelectQuery:
 
     def __repr__(self) -> str:
         return str(self)
+
+    def copy(self) -> 'SelectQuery':
+        new = SelectQuery(self._source, self._fields)
+        new._distinct = self._distinct
+        new._where = self._where
+        new._group = self._group
+        new._order = self._order
+        new._union_comparator = self._union_comparator
+
+        return new
