@@ -24,6 +24,7 @@ def transfer_object(cls: ClassVar):
 
     cls.get_contract = get_contract
     cls.as_dict = public_fields
+    cls.set_value = set_value
     cls.__setattr__ = set_value
     cls.__init__ = contract_init
 

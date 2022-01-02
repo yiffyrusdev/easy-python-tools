@@ -69,6 +69,12 @@ p1.age = None  # Exception will be thrown:
 ```python
 TypeError: <class 'NoneType'> is not a vaild type for age in <class '__main__.Person'> contract. Use <class 'int'>
 ```
+#### How to set values
+You can set value two ways:
+```python
+p1.age = 20
+p1.set_value('age', 20)
+```
 
 ### Playing with field metadata
 #### Field associated names
