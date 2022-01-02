@@ -33,6 +33,7 @@ Any help and criticism is greatly appreciated.
     - [x] WHERE selection
     - [x] Ordering
     - [x] Aggregate functions
+    - [x] HAVING section with auto-detection inside WHERE
   - [ ] Views
   - [ ] Other SQL shit
 - **Pseudo structures**
