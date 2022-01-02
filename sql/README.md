@@ -160,6 +160,8 @@ So you can, f.ex.,  select from table composition just as from real table.
 #### Cartesian product
 ```python
 printers_vendors = printers * vendors
+# or with instant method call:
+printers_vendors = printers.AND(vendors)
 
 printers_vendors
 ```
