@@ -16,6 +16,8 @@ SELECT
 **My sql shit**
 ```python
 (users & user_car & cars & vendors)['name', 'model', 'country'] == ((),(),("Russia", "US"))
+# or with equal method-powered syntax:
+users.INNER(user_car).INNER(cars).INNER(vendors).SELECT(['name', 'model', 'country']).WHERE_EQ(((),(),("Russia", "US")))
 ```
 
 ## Quick Start
@@ -101,6 +103,8 @@ printers.foreign_tables
 ```python
 printers << {"name":"Canon L100", "vendor_id": 1}
 printers << {"name":"Canon L200", "vendor_id": 1}
+# or use instant method call:
+printers.INSERT({"name":"Canon L200", "vendor_id": 1})
 ```
 Foreign Key constraints checked as long as Python sqlite3 checks them.
 
@@ -123,6 +127,8 @@ printers[:]()
 ---
 ```python
 printers['name']()
+# or use instant method call:
+printers.SELECT(['name'])()
 ```
 ```python
 [
@@ -181,7 +187,9 @@ Joining tables may be done two ways:
 # Foreign key to composite tables will be automatically detected
 # Otherwise exception will be thrown:
 printers_vendors = printers & vendors
-# ...or you can manually specify keys to join table:
+# or use instant method call:
+printers_vendors = printers.INNER(vendors)
+# ...you can even manually specify keys to join table:
 printers_vendors = printers.join(vendors, 'INNER', printers.f_vendor_id, vendors.f_id)
 
 printers_vendors
@@ -215,6 +223,8 @@ printers_vendors[:]()
 # Foreign key to composite tables will be automatically detected
 # Otherwise exception will be thrown:
 printers_vendors = vendors - printers
+# or use instant method call:
+printers_vendors = printers.LEFT(vendors)
 # ...or you can manually specify keys to join table:
 printers_vendors = vendors.join(printers, 'LEFT', printers.f_id, printers.f_vendor_id)
 
@@ -253,6 +263,7 @@ When Python's sqlite3 achieves this support, my lib will work out-of-the-box wit
 
 ```python
 printers_vendors = printers ^ vendors
+printers_vendors = printers.FULL(vendors)
 ```
 
 ### 9. Field access
@@ -296,6 +307,8 @@ vendors['country']
 # Selection with 'country' and value limitations
 vendors['country'] == ("Russia",)
 vendors['country'].WHERE_EQ(("Russia",))
+# or even such:
+vendors.SELECT(['country']).WHERE_EQ(("Russia",))
 
 # Select country, id from vendors where country = "Russia" or id = 2:
 vendors['country', 'id'] == ("Russia", 2)

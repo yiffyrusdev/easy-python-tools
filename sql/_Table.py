@@ -176,94 +176,7 @@ class Table:
 
         return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
 
-    def __getitem__(self, field_names: Union[slice, tuple, str, '_aggregate.Aggregate']) -> '_Query.SelectQuery':
-        """
-        Create SelectQuery for Table.
-
-        :param field_names: Table field names to select
-        :return: new SelectQuery
-        """
-        if isinstance(field_names, slice):
-            field_names = tuple(self.fields.keys())
-        if not isinstance(field_names, tuple):
-            field_names = (field_names,)
-
-        fields = []
-        for f in field_names:
-            if isinstance(f, _aggregate.Aggregate):
-                fields.append(f.compile(self))
-            else:
-                fields.append(self.field_by_name(f))
-
-        return _Query.SelectQuery(self, fields)
-
-    def __mul__(self, other: 'Table') -> 'Table':
-        """
-        Make cartisian prodyts of tables.
-
-        :param other: other Table for production
-        :return: new Table with is_real=False property
-        """
-        name = f'{self.name}_x_{other.name}'
-        binded = self.binded.union(other.binded)
-        query = f'({self.query} CROSS JOIN {other._query})'
-
-        return Table(name, self._db, table_query=query, binded_tables=binded)
-
-    def __xor__(self, other: 'Table') -> 'Table':
-        """
-        FULL JOIN two tables by foreign key.
-
-        :param other: other Tabl to join.
-        :return: new Table with is_real=False property
-        """
-        fk_connection = self.catch_fk_connection(other)
-        master = fk_connection.master_field.table
-        slave = fk_connection.slave_field.table
-
-        master_ref = fk_connection.master_field
-        slave_ref = fk_connection.slave_field
-
-        return self.join(other, 'FULL', master_ref, slave_ref)
-
-    def __sub__(self, other: 'Table') -> 'Table':
-        """
-        LEFT JOIN two tables by foreign key.
-
-        If you want a RIGHT JOIN, just LEFT JOIN tables in reversed order.
-
-        :param other: other Table to exclude from this Table.
-        :return:new Table with is_real=False property
-        """
-        fk_connection = self.catch_fk_connection(other)
-
-        if fk_connection.master_field.table == self:
-            self_ref = fk_connection.master_field
-            other_ref = fk_connection.slave_field
-        else:
-            self_ref = fk_connection.slave_field
-            other_ref = fk_connection.master_field
-
-        return self.join(other, 'LEFT', self_ref, other_ref)
-
-    def __and__(self, other: 'Table') -> 'Table':
-        """
-        INNER JOIN two tables by foreign key.
-
-        :param other: other Table to join
-        :return: new Table with is_real=False property
-        """
-        fk_connection = self.catch_fk_connection(other)
-
-        master = fk_connection.master_field.table
-        slave = fk_connection.slave_field.table
-
-        master_ref = fk_connection.master_field
-        slave_ref = fk_connection.slave_field
-
-        return self.join(other, 'INNER', master_ref, slave_ref)
-
-    def __lshift__(self, values: tuple | dict) -> None:
+    def INSERT(self, values: dict | tuple):
         """
         Insert new row into this Table with specified values.
 
@@ -295,6 +208,158 @@ class Table:
                 raise KeyError(f'Table {self} does not have field {f}')
 
         self.db.insert(self.name, fields, values)
+
+    def SELECT(self, field_names: Union[slice, tuple, str, '_aggregate.Aggregate']) -> '_Query.SelectQuery':
+        """
+        Create SelectQuery for Table.
+
+        :param field_names: Table field names to select
+        :return: new SelectQuery
+        """
+        if isinstance(field_names, slice):
+            field_names = tuple(self.fields.keys())
+        if not isinstance(field_names, tuple):
+            field_names = (field_names,)
+
+        fields = []
+        for f in field_names:
+            if isinstance(f, _aggregate.Aggregate):
+                fields.append(f.compile(self))
+            else:
+                fields.append(self.field_by_name(f))
+
+        return _Query.SelectQuery(self, fields)
+
+    def AND(self, other: 'Table') -> 'Table':
+        """
+        Make cartisian prodyts of tables.
+
+        :param other: other Table for production
+        :return: new Table with is_real=False property
+        """
+        name = f'{self.name}_x_{other.name}'
+        binded = self.binded.union(other.binded)
+        query = f'({self.query} CROSS JOIN {other._query})'
+
+        return Table(name, self._db, table_query=query, binded_tables=binded)
+
+    def INNER(self, other: 'Table') -> 'Table':
+        """
+        INNER JOIN two tables by foreign key.
+
+        :param other: other Table to join
+        :return: new Table with is_real=False property
+        """
+        fk_connection = self.catch_fk_connection(other)
+
+        master = fk_connection.master_field.table
+        slave = fk_connection.slave_field.table
+
+        master_ref = fk_connection.master_field
+        slave_ref = fk_connection.slave_field
+
+        return self.join(other, 'INNER', master_ref, slave_ref)
+
+    def LEFT(self, other: 'Table') -> 'Table':
+        """
+        LEFT JOIN two tables by foreign key.
+
+        If you want a RIGHT JOIN, just LEFT JOIN tables in reversed order.
+
+        :param other: other Table to exclude from this Table.
+        :return:new Table with is_real=False property
+        """
+        fk_connection = self.catch_fk_connection(other)
+
+        if fk_connection.master_field.table == self:
+            self_ref = fk_connection.master_field
+            other_ref = fk_connection.slave_field
+        else:
+            self_ref = fk_connection.slave_field
+            other_ref = fk_connection.master_field
+
+        return self.join(other, 'LEFT', self_ref, other_ref)
+
+    def FULL(self, other: 'Table') -> 'Table':
+        """
+        FULL JOIN two tables by foreign key.
+
+        :param other: other Tabl to join.
+        :return: new Table with is_real=False property
+        """
+        fk_connection = self.catch_fk_connection(other)
+        master = fk_connection.master_field.table
+        slave = fk_connection.slave_field.table
+
+        master_ref = fk_connection.master_field
+        slave_ref = fk_connection.slave_field
+
+        return self.join(other, 'FULL', master_ref, slave_ref)
+
+    def __getitem__(self, field_names: Union[slice, tuple, str, '_aggregate.Aggregate']) -> '_Query.SelectQuery':
+        """
+        Create SelectQuery for Table.
+
+        :param field_names: Table field names to select
+        :return: new SelectQuery
+        """
+        return self.SELECT(field_names)
+
+    def __mul__(self, other: 'Table') -> 'Table':
+        """
+        Make cartisian prodyts of tables.
+
+        :param other: other Table for production
+        :return: new Table with is_real=False property
+        """
+        return self.AND(other)
+
+    def __xor__(self, other: 'Table') -> 'Table':
+        """
+        FULL JOIN two tables by foreign key.
+
+        :param other: other Tabl to join.
+        :return: new Table with is_real=False property
+        """
+        return self.FULL(other)
+
+    def __sub__(self, other: 'Table') -> 'Table':
+        """
+        LEFT JOIN two tables by foreign key.
+
+        If you want a RIGHT JOIN, just LEFT JOIN tables in reversed order.
+
+        :param other: other Table to exclude from this Table.
+        :return:new Table with is_real=False property
+        """
+        return self.LEFT(other)
+
+    def __and__(self, other: 'Table') -> 'Table':
+        """
+        INNER JOIN two tables by foreign key.
+
+        :param other: other Table to join
+        :return: new Table with is_real=False property
+        """
+        return self.INNER(other)
+
+    def __lshift__(self, values: tuple | dict) -> None:
+        """
+        Insert new row into this Table with specified values.
+
+        Gaps in values are not supported.
+        Only Real Tables supported.
+
+        if <tuple> is passed:
+        - Values order must match this Table fields order. See Table.fields property.
+        - If Table Primary Key is AUTOINCREMENT you have not to use dict.
+
+        if <dict> is passed:
+        - keys are field names, values are values.
+
+        :param values: <tuple | dict> definition for new row.
+        """
+        self.INSERT(values)
 
     def __repr__(self) -> str:
         return f'Table<{self.name} of {self.db.name}, {"Real" if self.is_real else "Composition"}>'
