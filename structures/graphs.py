@@ -1,2 +1,2 @@
-from ._Graph import Graph
-from ._OrientedGraph import OrientedGraph
+from .pygraphs._Graph import Graph
+from .pygraphs._OrientedGraph import OrientedGraph

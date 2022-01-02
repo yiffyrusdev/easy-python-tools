@@ -1,7 +1,7 @@
 from typing import Iterable
 
-from ._BinaryTree import BinaryTree as PyBinaryTree
-from ._PrefixTree import PrefixTree as PyPrefixTree
+from .pytrees._BinaryTree import BinaryTree as PyBinaryTree
+from .pytrees._PrefixTree import PrefixTree as PyPrefixTree
 from ._internal import CompType, HashType
 
 
