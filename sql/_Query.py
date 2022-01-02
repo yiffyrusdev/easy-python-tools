@@ -60,6 +60,7 @@ class SelectQuery:
         self._fields = tuple(fields)
         self._distinct = False
         self._where = None
+        self._having = None
         self._body = None
         self._union_comparator = _Where.WhereAND
         self._group: tuple['_Table.TableField'] = tuple()
@@ -79,6 +80,10 @@ class SelectQuery:
     @property
     def where_condition(self) -> Type['_Where.Where']:
         return self._where
+
+    @property
+    def having_condition(self) -> Type['_Where.Where']:
+        return self._having
 
     @property
     def group_fields(self) -> tuple['_Table.TableField']:
@@ -141,22 +146,28 @@ class SelectQuery:
             raise TypeError(f'expected <tuple> for AND or <list> for OR, got {type(values)}')
 
         new_wheres = []
+        new_havings = []
         for value, field in zip(_internal.proper_values(values), self.fields):
             if (value == tuple()) or (value == list()):
                 continue
             if isinstance(value, tuple):
-                new_where = _Where.WhereOR(*(comparison(field, v) for v in _internal.proper_values(value)))
+                new_condition = _Where.WhereOR(*(comparison(field, v) for v in _internal.proper_values(value)))
             elif isinstance(value, list):
-                new_where = _Where.WhereAND(*(comparison(field, v) for v in _internal.proper_values(value)))
+                new_condition = _Where.WhereAND(*(comparison(field, v) for v in _internal.proper_values(value)))
             else:
-                new_where = comparison(field, value)
+                new_condition = comparison(field, value)
 
-            new_wheres.append(new_where)
+            if isinstance(field, _Table.CalculatedField):
+                new_havings.append(new_condition)
+            else:
+                new_wheres.append(new_condition)
 
-        where = union(self._where,where_type(*new_wheres)) if self._where is not None else where_type(*new_wheres)
+        where = union(self._where, where_type(*new_wheres)) if self._where is not None else where_type(*new_wheres)
+        having = union(self._having, where_type(*new_havings)) if self._having is not None else where_type(*new_havings)
 
         new = self.copy()
-        new._where = where
+        new._where = where if new_wheres else None
+        new._having = having if new_havings else None
         return new
 
     def WHERE_EQ(self, values: list | tuple) -> 'SelectQuery':
@@ -226,11 +237,12 @@ class SelectQuery:
         select = f'''SELECT {"DISTINCT" if self._distinct else ""}
         {",".join(f.full_name for f in self.fields)} 
         FROM {self.source.query}'''
-        where = f' WHERE {self._where}' if self._where is not None else ""
+        where = f' WHERE {self._where}' if self._where else ""
         group = f' GROUP BY {",".join(f.full_name for f in self._group)}' if self._group else ""
         order = f' ORDER BY {",".join(f.full_name for f in self._order)}' if self._order else ""
+        having = f' HAVING {self._having}' if self._having else ""
 
-        query = f'{select}{where}{group}{order};'
+        query = f'{select}{where}{group}{having}{order};'
         return query
 
     def __repr__(self) -> str:
@@ -240,6 +252,7 @@ class SelectQuery:
         new = SelectQuery(self._source, self._fields)
         new._distinct = self._distinct
         new._where = self._where
+        new._having = self._having
         new._group = self._group
         new._order = self._order
         new._union_comparator = self._union_comparator

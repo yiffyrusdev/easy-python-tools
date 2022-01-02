@@ -424,3 +424,16 @@ Use aggregates instead of regular field names in selection query:
 (printers & vendors)[COUNT('Vendors.name'), 'country'].GROUPBY(('country',))
 
 ```
+
+#### 12.1. Aggregate function selection conditions
+Just set conditions like to regular fields, selection object would automatically detect calculated fields and put them to HAVING section of query:
+```python
+((printers & vendors)[COUNT('Vendors.name'), 'country'] % ('country',)) > [2, ("Japan", "Russia")]
+(printers & vendors)[COUNT('Vendors.name'), 'country'].GROUPBY(('country',)).WHERE_GT([2, ("Japan", "Russia")])
+```
+```sql
+SELECT 
+        COUNT(Vendors.name),Vendors.country 
+        FROM (Printers INNER JOIN Vendors ON Vendors.id = Printers.vendor_id) WHERE (((Vendors.country > "Japan") OR (Vendors.country > "Russia"))) GROUP BY Vendors.country HAVING ((COUNT(Vendors.name) > 2));
+
+```

@@ -11,10 +11,10 @@ class Where:
         self._left = field1
         self._right = field2
 
-        if isinstance(self._left, _Table.TableField):
+        if isinstance(self._left, Union[_Table.TableField, _Table.CalculatedField]):
             self._left = self._left.full_name
 
-        if isinstance(self._right, _Table.TableField):
+        if isinstance(self._right, Union[_Table.TableField, _Table.CalculatedField]):
             self._right = self._right.full_name
 
     def __str__(self) -> str:
