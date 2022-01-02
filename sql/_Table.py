@@ -1,13 +1,14 @@
-from typing import Iterable
+from typing import Iterable, Union
 import sql._Base as _Base
 import sql._Query as _Query
+import sql._aggregate as _aggregate
 
 
 class Table:
     """
     Table object which represents SQL table or SQL composition of Table objects.
     """
-    def __init__(self, table_name: str, db_obj: '_Base.DBase', table_query: str=None, binded_tables: Iterable['Table']=None):
+    def __init__(self, table_name: str, db_obj: '_Base.DBase', table_query: str = None, binded_tables: Iterable['Table'] = None):
         self._name = table_name
         self._query = table_name if table_query is None else table_query
         self._is_real = binded_tables is None
@@ -175,7 +176,7 @@ class Table:
 
         return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
 
-    def __getitem__(self, field_names: slice | tuple) -> '_Query.SelectQuery':
+    def __getitem__(self, field_names: Union[slice, tuple, str, '_aggregate.Aggregate']) -> '_Query.SelectQuery':
         """
         Create SelectQuery for Table.
 
@@ -187,7 +188,12 @@ class Table:
         if not isinstance(field_names, tuple):
             field_names = (field_names,)
 
-        fields = (self.field_by_name(f) for f in field_names)
+        fields = []
+        for f in field_names:
+            if isinstance(f, _aggregate.Aggregate):
+                fields.append(f.compile(self))
+            else:
+                fields.append(self.field_by_name(f))
 
         return _Query.SelectQuery(self, fields)
 
@@ -323,6 +329,53 @@ class TableField:
 
     def __hash__(self):
         return hash((self.name, self.table.name, self.table.db.name))
+
+
+class CalculatedField:
+    def __init__(self, field: 'TableField', function: str):
+        self.field = field
+        self.function = function
+
+    @property
+    def full_name(self) -> str:
+        return f'{self.function}({self.field.full_name})'
+
+    @property
+    def id(self) -> int:
+        return self.field.id
+
+    @property
+    def table(self) -> 'Table':
+        return self.field.table
+
+    @property
+    def type(self) -> str:
+        return self.field.type
+
+    @property
+    def is_primary(self) -> bool:
+        return self.field.is_primary
+
+    @property
+    def attrs(self) -> set[str]:
+        return self.field.attrs
+
+    @property
+    def name(self):
+        return self.field.name
+
+    def __repr__(self) -> str:
+        return f'CalculatedField<{self.function} from {self.field}>'
+
+    def __eq__(self, other: Union['CalculatedField', 'TableField']) -> bool:
+        equality = (self.name == other.name) and (self.table == other.table)
+        if isinstance(other, CalculatedField):
+            equality = equality and (self.function == other.function)
+
+        return equality
+
+    def __hash__(self):
+        return hash((self.name, self.table.name, self.table.db.name, self.function))
 
 
 class TableFK:

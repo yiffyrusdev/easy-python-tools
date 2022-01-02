@@ -131,6 +131,22 @@ printers['name']()
 ]
 ```
 
+#### 7.1. Ordering
+You can order selected rows by fields with following syntax:
+```python
+printers[:] / ('name',)
+# or with instant method call:
+printers[:].ORDERBY(('name',))
+```
+
+#### 7.2. Grouping
+You can group selected rows by fields with following syntaxL
+```python
+printers[:] % ('country',)
+# or with instant method call:
+printers[:].GROUPBY(('country',))
+```
+
 ### 8. Table compositioning
 Any table composition result is 'Table' object with some restrictions.
 
@@ -269,9 +285,9 @@ To limit rows with field value, you have to specify conditions for all fields me
 Empty tuple means no limitation ob field.
 
 There are several condition types:
-- Greater -- ">" operator
-- Equals -- "==" operator
-- Lesser -- "<" operator
+- Greater -- ">" operator (or WHERE_GT method)
+- Equals -- "==" operator (or WHERE_EQ method)
+- Lesser -- "<" operator (or WHERE_LT metho)
 
 To limit selection, use one of theese operators with selection on left and limitation on right:
 ```python
@@ -279,33 +295,44 @@ To limit selection, use one of theese operators with selection on left and limit
 vendors['country']
 # Selection with 'country' and value limitations
 vendors['country'] == ("Russia",)
+vendors['country'].WHERE_EQ(("Russia",))
 
 # Select country, id from vendors where country = "Russia" or id = 2:
 vendors['country', 'id'] == ("Russia", 2)
+vendors['country', 'id'].WHERE_EQ(("Russia", 2))
 
 # Select country, id from vendors where country = "Russia" and id = 2:
 vendors['country', 'id'] == ['Russia', 2]
+vendors['country', 'id'].WHERE_EQ(["Russia", 2])
 
 # Select id, country from vendors where country = "Russia" or country = "Japan":
 vendors['id', 'country'] == [(), ("Russia","Japan"),]
+vendors['id', 'country'].WHERE_EQ([(), ("Russia","Japan"),])
 
 # Select id, country, name from vendors where (country = "Russia" or country = "Japan") or (id = 10)
 vendors['id', 'country'] == (10, ("Russia","Japan"),)
+vendors['id', 'country'].WHERE_EQ((10, ("Russia","Japan"),))
 
 # Select id, country, name from vendors where (country = "Russia" or country = "Japan") and (id = 10 or id = 20)
 vendors['id', 'country'] == [(10, 20), ("Russia","Japan"),]
+vendors['id', 'country'].WHERE_EQ([(10, 20), ("Russia","Japan"),])
+
 ```
 
 You can also combine different comparisons with AND operator:
 ```python
 # select id, country from vandors where (id = 10 or country = "Japan") AND (id < 20):
 (vendors['id'] == (10, "Japan")) < (20,)
+# these two are equal to each other and to the previous one
+vendors['id'].WHERE_EQ((10, "Japan")).WHERE_LT((20,))
+vendors['id'].WHERE_EQ((10, "Japan")).AND.WHERE_LT((20,))
 ```
 
 To combine different comparisons with OR, use special property:
 ```python
 # select id, country from vandors where (id = 10 or country = "Japan") OR (id < 20):
 (vendors['id'] == (10, "Japan")).OR < (20,)
+vendors['id'].WHERE_EQ((10, "JAPAN")).OR.WHERE_LT((20,))
 ```
 
 Note, that every selection is a SelectQuery object. To select values from database, call selection:
@@ -328,6 +355,8 @@ vendors[:]()
 ---
 ```python
 q = vendors['id', 'name'] > (1,)
+# or use a method:
+q = vendors['id', 'name'].WHERE_GT((1,))
 
 q
 ```
@@ -351,6 +380,7 @@ So, update syntax is very similar to insert syntax, just for SelectQuery instead
 ```python
 # Update values with tuple. You must specify all values in same order as they are in selection:
 (vendors['name'] == ("Tayouta",)) << ("Tamoyo",)
+(vendors['name'].WHERE_EQ(("Tayouta",))) << ("Tamoyo",) # etc..
 
 # Wrong assignment type, throws exception:
 vendors['id'] == (10,)) << ("Tamoyo",) # Exception
@@ -362,4 +392,18 @@ vendors['id', 'name'] == ((10, 2),)) << ((), "Tamoyo",) # Excption
 # Update values with dict. You can specify any field assignment:
 (vendors['id'] == ((2, 3),)) << {"name": "Tamoyo"}
 (vendors['id', 'name'] == ((2, 3),)) << {"name": "Tamoyo"}
+```
+
+### 12. Aggregate functions
+Aggregate functions are available in separate submodule:
+```python
+from sql.aggregate import COUNT, SUM, AVG, MAX, MIN
+```
+
+Use aggregates as regular field names in selection query:
+```python
+(printers & vendors)[COUNT('Vendors.name')]
+
+# or you can use group by expressions as well:
+(printers & vendors)[COUNT('Vendors.name'), 'country'] % ('country',)
 ```

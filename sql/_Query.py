@@ -204,6 +204,9 @@ class SelectQuery:
         """Make new SelectQuery, which copy of current, but with grouping fields."""
         return self.GROUPBY(fields)
 
+    def __div__(self, fields: tuple) -> 'SelectQuery':
+        return self.ORDERBY(fields)
+
     def __lshift__(self, values: tuple | dict) -> 'UpdateQuery':
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
         return self.UPDATE(values)
@@ -225,8 +228,9 @@ class SelectQuery:
         FROM {self.source.query}'''
         where = f' WHERE {self._where}' if self._where is not None else ""
         group = f' GROUP BY {",".join(f.full_name for f in self._group)}' if self._group else ""
+        order = f' ORDER BY {",".join(f.full_name for f in self._order)}' if self._order else ""
 
-        query = f'{select}{where}{group};'
+        query = f'{select}{where}{group}{order};'
         return query
 
     def __repr__(self) -> str:
