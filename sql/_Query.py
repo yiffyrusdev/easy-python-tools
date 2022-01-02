@@ -14,6 +14,7 @@ class UpdateQuery:
         self._fields = selection.fields
         self._values = values
         self._where = selection.where_condition
+        self._having = selection.having_condition
         self._group = selection.group_fields
 
         if (not self._target.is_real) and (self._where is not None):
@@ -45,7 +46,8 @@ class UpdateQuery:
         {self._target.name} SET {",".join(fields)} = ({",".join(_internal.proper_values(values))})'''
         where = f' WHERE {self._where}' if self._where is not None else ""
         group = f' GROUP BY {",".join(f.full_name for f in self._group)}' if self._group else ""
-        return f'{update}{where}{group};'
+        having = f' HAVING {self._having}' if self._having else ""
+        return f'{update}{where}{group}{having};'
 
     def __repr__(self) -> str:
         return str(self)
