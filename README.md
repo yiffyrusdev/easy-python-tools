@@ -72,7 +72,7 @@ Any help and criticism is greatly appreciated.
     - [x] Oriented graph _(Python)_
     - [ ] Network with flows _(Python)_
 - **Class and object enhancements**
-  - [x] DataTransferObject class decorator _(Python)_
+  - [x] DataTransferObject class decorator _(Python)_ [see docs](./dto/README.md)
 
 ## Requirements
 Python implementations require the following:

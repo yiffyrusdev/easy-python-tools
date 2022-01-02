@@ -43,7 +43,7 @@ def is_contract_field(cls: ClassVar, name: str) -> bool:
     return name in cls.__dict__ and contr_name(name) in cls.__dict__ and contr_type(name) in cls.__dict__
 
 
-def is_allowed(cls: ClassVar, field:str, value) -> bool:
+def is_allowed(cls: ClassVar, field: str, value) -> bool:
     alfield = allowed_values(field)
     if cls.__dict__[alfield]:
         return value in cls.__dict__[alfield]
