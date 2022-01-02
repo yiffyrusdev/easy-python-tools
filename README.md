@@ -29,10 +29,10 @@ Any help and criticism is greatly appreciated.
     - [x] Cartesian product
     - [x] SELECT from table composition
     - [x] Treat Composition as Table
-  - [ ] Advanced Table operations
+  - [x] Advanced Table operations
     - [x] WHERE selection
-    - [ ] Ordering
-    - [ ] Group functions
+    - [x] Ordering
+    - [x] Aggregate functions
   - [ ] Views
   - [ ] Other SQL shit
 - **Pseudo structures**
