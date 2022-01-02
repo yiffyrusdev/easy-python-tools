@@ -400,10 +400,12 @@ Aggregate functions are available in separate submodule:
 from sql.aggregate import COUNT, SUM, AVG, MAX, MIN
 ```
 
-Use aggregates as regular field names in selection query:
+Use aggregates instead of regular field names in selection query:
 ```python
 (printers & vendors)[COUNT('Vendors.name')]
 
 # or you can use group by expressions as well:
 (printers & vendors)[COUNT('Vendors.name'), 'country'] % ('country',)
+(printers & vendors)[COUNT('Vendors.name'), 'country'].GROUPBY(('country',))
+
 ```
