@@ -48,7 +48,7 @@ pip install -i https://test.pypi.org/simple/ easy-pytools
   - [ ] Prioritized Queue
     - [ ] _Python_
     - [ ] _C++_
-- **Basic data structures**
+- **Basic data structures** [see docs](./structures/README.md)
   - **Plain**
     - [ ] LinkedList
       - [ ] _Python_
