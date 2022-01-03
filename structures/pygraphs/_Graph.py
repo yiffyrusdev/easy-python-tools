@@ -1,11 +1,10 @@
-from .._internal import EqType
 from typing import Hashable, Iterable
 from math import inf as INF
 
 from ..primitives import Queue
 
 
-class Graph:
+class PyGraph:
     def __init__(self):
         self._graph_vertex: set[Hashable] = set()
         self._graph_adj: dict[Hashable, set] = dict()
@@ -38,12 +37,6 @@ class Graph:
             return (value2 in self._graph_adj[value1]) and (value1 in self._graph_adj[value2])
         else:
             raise ValueError(f"`{value1}` or `{value2}` not in graph")
-
-    def has_direct_path(self, value_from: Hashable, value_to: Hashable):
-        if value_from in self and value_to in self:
-            return value_to in self._graph_adj[value_from]
-        else:
-            raise ValueError(f"`{value_from}` or `{value_to}` not in graph")
 
     def adjacents(self, value: Hashable) -> set:
         if value in self:
@@ -87,7 +80,7 @@ class Graph:
         paths = dict()
         for v in self._graph_vertex:
             weight = self.edge_weight(value_from, v)
-            path = [value_from] if weight < INF else []
+            path = [value_from, value_to] if weight < INF else []
             paths.update({v: {'path': path, 'weight': weight}})
         paths[value_from] = {'path': [value_from], 'weight': 0}
         unvisited = self._graph_vertex.copy()
@@ -100,14 +93,14 @@ class Graph:
                     min_path = paths[u]['weight']
                     min_vertex = u
 
-            if min_vertex is None:
+            if min_path == INF:
                 break
 
             unvisited.remove(min_vertex)
             for v, data in paths.items():
                 if data['weight'] > (p := paths[min_vertex]['weight'] + self.edge_weight(min_vertex, v)):
                     paths[v]['weight'] = p
-                    paths[v]['path'] = paths[min_vertex]['path'] + [v]
+                    paths[v]['path'] = paths[min_vertex]['path'] + [min_vertex, v]
         return paths[value_to]
 
     def set_attr(self, vertex: Hashable, attr: Hashable):
