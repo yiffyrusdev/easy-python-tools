@@ -1,0 +1,12 @@
+# ninja log v5
+8867	9066	1640070335918295100	trees.so	31d3aff0a11eb175
+5	5186	1640004788915608300	CMakeFiles/trees_lib.dir/src/trees/binary_tree.cpp.o	bb5a5fef779ab32a
+7793	7934	1640070334787144600	libtrees_lib.so	a58d240dadc1b741
+1	69	1640072992839479900	build.ninja	a64b54357390de85
+5	4551	1639977801214880600	CMakeFiles/primitives_lib.dir/src/primitives/stack.cpp.o	66711d9d8acd0c17
+4	3319	1639978256373551500	CMakeFiles/primitives.dir/src/primitives_wrapper.cpp.o	60fb00a43d422148
+2815	2882	1639978255936203200	libprimitives_lib.so	e2a0a9b2712e2d3f
+7	7793	1640070334644633700	CMakeFiles/trees_lib.dir/src/trees/prefix_tree.cpp.o	3c22b77a58aeac41
+4	2814	1639978255867530200	CMakeFiles/primitives_lib.dir/src/primitives/queue.cpp.o	c26ead16e0d38aca
+3320	3395	1639978256448919200	primitives.so	63d3f7a215bb87e0
+7	8866	1640070335716799600	CMakeFiles/trees.dir/src/trees_wrapper.cpp.o	43e690a5d132f233

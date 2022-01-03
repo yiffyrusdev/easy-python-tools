@@ -20,4 +20,3 @@ def proper_values(values: Iterable) -> list:
         else:
             proper_values.append(f'{v}')
     return proper_values
-

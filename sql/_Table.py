@@ -1,7 +1,7 @@
 from typing import Iterable, Union
 import sql._Base as _Base
 import sql._Query as _Query
-import sql._aggregate as _aggregate
+import sql._Aggregate as _aggregate
 
 
 class Table:
