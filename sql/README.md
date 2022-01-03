@@ -412,24 +412,24 @@ vendors['id', 'name'] == ((10, 2),)) << ((), "Tamoyo",) # Excption
 ### 12. Aggregate functions
 Aggregate functions are available in separate submodule:
 ```python
-from easy_pytools.sql import aggregate as ag
+from easy_pytools.sql.aggregate import *
 ```
 
 Use aggregates instead of regular field names in selection query:
 ```python
-(printers & vendors)[ag.COUNT('Vendors.name')]
+(printers & vendors)[COUNT('Vendors.name')]
 
 # or you can use group by expressions as well:
-(printers & vendors)[ag.COUNT('Vendors.name'), 'country'] % ('country',)
-(printers & vendors)[ag.COUNT('Vendors.name'), 'country'].GROUPBY(('country',))
+(printers & vendors)[COUNT('Vendors.name'), 'country'] % ('country',)
+(printers & vendors)[COUNT('Vendors.name'), 'country'].GROUPBY(('country',))
 
 ```
 
 #### 12.1. Aggregate function selection conditions
 Just set conditions like to regular fields, selection object would automatically detect calculated fields and put them to HAVING section of query:
 ```python
-((printers & vendors)[ag.COUNT('Vendors.name'), 'country'] % ('country',)) == [2, ("Japan", "Russia")]
-(printers & vendors)[ag.COUNT('Vendors.name'), 'country'].GROUPBY(('country',)).WHERE_EQ([2, ("Japan", "Russia")])
+((printers & vendors)[COUNT('Vendors.name'), 'country'] % ('country',)) == [2, ("Japan", "Russia")]
+(printers & vendors)[COUNT('Vendors.name'), 'country'].GROUPBY(('country',)).WHERE_EQ([2, ("Japan", "Russia")])
 ```
 ```sql
 SELECT 

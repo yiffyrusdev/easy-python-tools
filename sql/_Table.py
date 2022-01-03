@@ -1,7 +1,7 @@
 from typing import Iterable, Union
 from . import _Base
 from . import _Query
-from . import _Aggregate
+from . import aggregate
 
 
 class Table:
@@ -209,7 +209,7 @@ class Table:
 
         self.db.insert(self.name, fields, values)
 
-    def SELECT(self, field_names: Union[slice, tuple, str, '_Aggregate.Aggregate']) -> '_Query.SelectQuery':
+    def SELECT(self, field_names: Union[slice, tuple, str, 'aggregate.Aggregate']) -> '_Query.SelectQuery':
         """
         Create SelectQuery for Table.
 
@@ -223,7 +223,7 @@ class Table:
 
         fields = []
         for f in field_names:
-            if isinstance(f, _Aggregate.Aggregate):
+            if isinstance(f, aggregate.Aggregate):
                 fields.append(f.compile(self))
             else:
                 fields.append(self.field_by_name(f))
@@ -296,7 +296,7 @@ class Table:
 
         return self.join(other, 'FULL', master_ref, slave_ref)
 
-    def __getitem__(self, field_names: Union[slice, tuple, str, '_Aggregate.Aggregate']) -> '_Query.SelectQuery':
+    def __getitem__(self, field_names: Union[slice, tuple, str, 'aggregate.Aggregate']) -> '_Query.SelectQuery':
         """
         Create SelectQuery for Table.
 
