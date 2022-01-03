@@ -1,8 +1,8 @@
 from typing import Iterable, Union, Type
-import sql._Table as _Table
-import sql._Where as _Where
-import sql._internal as _internal
-import sql._exceptions as _exceptions
+from . import _Table
+from . import _Where
+from . import _internal
+from . import _exceptions
 
 
 class UpdateQuery:

@@ -1,9 +1,9 @@
 import sqlite3
 from typing import Iterable, Union
 
-import sql._exceptions as _exceptions
-import sql._Table as _Table
-import sql._internal as _internal
+from . import _exceptions
+from . import _Table
+from . import _internal
 
 
 class DBase:

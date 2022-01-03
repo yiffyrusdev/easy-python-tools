@@ -1,4 +1,4 @@
-import sql._Table as _Table
+from . import _Table
 
 
 class Aggregate:

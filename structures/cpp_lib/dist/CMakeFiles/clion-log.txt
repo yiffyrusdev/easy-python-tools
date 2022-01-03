@@ -1,4 +1,4 @@
-/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/ninja -G Ninja /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib
+/bin/cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/ninja -G Ninja /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib
 -- The C compiler identification is GNU 11.1.0
 -- The CXX compiler identification is GNU 11.1.0
 -- Detecting C compiler ABI info
@@ -15,4 +15,4 @@
 -- Found Boost: /usr/lib64/cmake/Boost-1.78.0/BoostConfig.cmake (found version "1.78.0") found components: python 
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist
+-- Build files have been written to: /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist

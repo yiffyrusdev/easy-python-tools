@@ -99,7 +99,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /usr/bin/cmake --regenerate-during-build -S/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib -B/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/cmake-build-debug
+  command = /usr/bin/cmake --regenerate-during-build -S/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib -B/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/cmake-build-debug
   description = Re-running CMake...
   generator = 1
 

@@ -31,4 +31,4 @@ class PrefixTree:
         raise NotImplementedError()
 
 
-from cpp_lib.dist.trees import BinaryTree, PrefixTree
+from .cpp_lib.dist.trees import BinaryTree, PrefixTree

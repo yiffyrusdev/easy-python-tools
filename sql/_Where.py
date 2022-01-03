@@ -1,6 +1,6 @@
 from typing import Union
 
-import sql._Table as _Table
+from . import _Table
 
 
 class Where:

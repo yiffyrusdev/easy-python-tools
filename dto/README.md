@@ -22,7 +22,7 @@ In this part of easy_tools I try to implement some useful autimatizations for bu
 ## Quick Start
 import transfer_object decorator and create meta-class with default values:
 ```python
-from dto import transfer_object
+from easy_pytools.dto import transfer_object
 
 @transfer_object
 class Person:

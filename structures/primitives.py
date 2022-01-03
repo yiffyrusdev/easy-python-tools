@@ -43,4 +43,4 @@ class Stack:
         raise NotImplementedError()
 
 
-from cpp_lib.dist.primitives import Queue, Stack
+from .cpp_lib.dist.primitives import Stack, Queue

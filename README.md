@@ -16,6 +16,12 @@ If you find this code useful, I will be glad if you use it in your GPL3-compatib
 
 Any help and criticism is greatly appreciated.
 
+## Installation
+The package is currently presented on TestPyPi.
+```
+pip install -i https://test.pypi.org/simple/ easy-pytools
+```
+
 ## Roadmap
 - **SQL shit (Oh God. PYTHON ONLY)** [see docs](./sql/README.md)
   - [x] Basic Table operations

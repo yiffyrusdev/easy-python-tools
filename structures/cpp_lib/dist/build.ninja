@@ -39,7 +39,7 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist/
+cmake_ninja_workdir = /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist/
 # =============================================================================
 # Object build statements for SHARED_LIBRARY target primitives_lib
 
@@ -49,21 +49,21 @@ cmake_ninja_workdir = /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/c
 
 build cmake_object_order_depends_target_primitives_lib: phony || CMakeFiles/primitives_lib.dir
 
-build CMakeFiles/primitives_lib.dir/src/primitives/queue.cpp.o: CXX_COMPILER__primitives_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/src/primitives/queue.cpp || cmake_object_order_depends_target_primitives_lib
+build CMakeFiles/primitives_lib.dir/src/primitives/queue.cpp.o: CXX_COMPILER__primitives_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/src/primitives/queue.cpp || cmake_object_order_depends_target_primitives_lib
   DEFINES = -DBOOST_PYTHON_DYN_LINK -DBOOST_PYTHON_NO_LIB -Dprimitives_lib_EXPORTS
   DEP_FILE = CMakeFiles/primitives_lib.dir/src/primitives/queue.cpp.o.d
   FLAGS = -O3 -DNDEBUG -fPIC -std=gnu++23
-  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/PRIVATE -I/usr/include/python3.10
+  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/PRIVATE -I/usr/include/python3.10
   OBJECT_DIR = CMakeFiles/primitives_lib.dir
   OBJECT_FILE_DIR = CMakeFiles/primitives_lib.dir/src/primitives
   TARGET_COMPILE_PDB = CMakeFiles/primitives_lib.dir/
   TARGET_PDB = libprimitives_lib.pdb
 
-build CMakeFiles/primitives_lib.dir/src/primitives/stack.cpp.o: CXX_COMPILER__primitives_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/src/primitives/stack.cpp || cmake_object_order_depends_target_primitives_lib
+build CMakeFiles/primitives_lib.dir/src/primitives/stack.cpp.o: CXX_COMPILER__primitives_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/src/primitives/stack.cpp || cmake_object_order_depends_target_primitives_lib
   DEFINES = -DBOOST_PYTHON_DYN_LINK -DBOOST_PYTHON_NO_LIB -Dprimitives_lib_EXPORTS
   DEP_FILE = CMakeFiles/primitives_lib.dir/src/primitives/stack.cpp.o.d
   FLAGS = -O3 -DNDEBUG -fPIC -std=gnu++23
-  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/PRIVATE -I/usr/include/python3.10
+  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/PRIVATE -I/usr/include/python3.10
   OBJECT_DIR = CMakeFiles/primitives_lib.dir
   OBJECT_FILE_DIR = CMakeFiles/primitives_lib.dir/src/primitives
   TARGET_COMPILE_PDB = CMakeFiles/primitives_lib.dir/
@@ -98,11 +98,11 @@ build libprimitives_lib.so: CXX_SHARED_LIBRARY_LINKER__primitives_lib_Release CM
 
 build cmake_object_order_depends_target_primitives: phony || cmake_object_order_depends_target_primitives_lib
 
-build CMakeFiles/primitives.dir/src/primitives_wrapper.cpp.o: CXX_COMPILER__primitives_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/src/primitives_wrapper.cpp || cmake_object_order_depends_target_primitives
+build CMakeFiles/primitives.dir/src/primitives_wrapper.cpp.o: CXX_COMPILER__primitives_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/src/primitives_wrapper.cpp || cmake_object_order_depends_target_primitives
   DEFINES = -DBOOST_PYTHON_DYN_LINK -DBOOST_PYTHON_NO_LIB -Dprimitives_EXPORTS
   DEP_FILE = CMakeFiles/primitives.dir/src/primitives_wrapper.cpp.o.d
   FLAGS = -O3 -DNDEBUG -fPIC -std=gnu++23
-  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/PRIVATE -I/usr/include/python3.10
+  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/PRIVATE -I/usr/include/python3.10
   OBJECT_DIR = CMakeFiles/primitives.dir
   OBJECT_FILE_DIR = CMakeFiles/primitives.dir/src
   TARGET_COMPILE_PDB = CMakeFiles/primitives.dir/
@@ -118,7 +118,7 @@ build CMakeFiles/primitives.dir/src/primitives_wrapper.cpp.o: CXX_COMPILER__prim
 
 build primitives.so: CXX_MODULE_LIBRARY_LINKER__primitives_Release CMakeFiles/primitives.dir/src/primitives_wrapper.cpp.o | /usr/lib/libpython3.10.so libprimitives_lib.so /usr/lib/libboost_python310.so.1.78.0 /usr/lib/libpython3.10.so || libprimitives_lib.so
   LANGUAGE_COMPILE_FLAGS = -O3 -DNDEBUG
-  LINK_LIBRARIES = -Wl,-rpath,/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist  /usr/lib/libpython3.10.so  libprimitives_lib.so  /usr/lib/libboost_python310.so.1.78.0  /usr/lib/libpython3.10.so
+  LINK_LIBRARIES = -Wl,-rpath,/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist  /usr/lib/libpython3.10.so  libprimitives_lib.so  /usr/lib/libboost_python310.so.1.78.0  /usr/lib/libpython3.10.so
   OBJECT_DIR = CMakeFiles/primitives.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -135,21 +135,21 @@ build primitives.so: CXX_MODULE_LIBRARY_LINKER__primitives_Release CMakeFiles/pr
 
 build cmake_object_order_depends_target_trees_lib: phony || CMakeFiles/trees_lib.dir
 
-build CMakeFiles/trees_lib.dir/src/trees/binary_tree.cpp.o: CXX_COMPILER__trees_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/src/trees/binary_tree.cpp || cmake_object_order_depends_target_trees_lib
+build CMakeFiles/trees_lib.dir/src/trees/binary_tree.cpp.o: CXX_COMPILER__trees_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/src/trees/binary_tree.cpp || cmake_object_order_depends_target_trees_lib
   DEFINES = -DBOOST_PYTHON_DYN_LINK -DBOOST_PYTHON_NO_LIB -Dtrees_lib_EXPORTS
   DEP_FILE = CMakeFiles/trees_lib.dir/src/trees/binary_tree.cpp.o.d
   FLAGS = -O3 -DNDEBUG -fPIC -std=gnu++23
-  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/PRIVATE -I/usr/include/python3.10
+  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/PRIVATE -I/usr/include/python3.10
   OBJECT_DIR = CMakeFiles/trees_lib.dir
   OBJECT_FILE_DIR = CMakeFiles/trees_lib.dir/src/trees
   TARGET_COMPILE_PDB = CMakeFiles/trees_lib.dir/
   TARGET_PDB = libtrees_lib.pdb
 
-build CMakeFiles/trees_lib.dir/src/trees/prefix_tree.cpp.o: CXX_COMPILER__trees_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/src/trees/prefix_tree.cpp || cmake_object_order_depends_target_trees_lib
+build CMakeFiles/trees_lib.dir/src/trees/prefix_tree.cpp.o: CXX_COMPILER__trees_lib_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/src/trees/prefix_tree.cpp || cmake_object_order_depends_target_trees_lib
   DEFINES = -DBOOST_PYTHON_DYN_LINK -DBOOST_PYTHON_NO_LIB -Dtrees_lib_EXPORTS
   DEP_FILE = CMakeFiles/trees_lib.dir/src/trees/prefix_tree.cpp.o.d
   FLAGS = -O3 -DNDEBUG -fPIC -std=gnu++23
-  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/PRIVATE -I/usr/include/python3.10
+  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/PRIVATE -I/usr/include/python3.10
   OBJECT_DIR = CMakeFiles/trees_lib.dir
   OBJECT_FILE_DIR = CMakeFiles/trees_lib.dir/src/trees
   TARGET_COMPILE_PDB = CMakeFiles/trees_lib.dir/
@@ -184,11 +184,11 @@ build libtrees_lib.so: CXX_SHARED_LIBRARY_LINKER__trees_lib_Release CMakeFiles/t
 
 build cmake_object_order_depends_target_trees: phony || cmake_object_order_depends_target_trees_lib
 
-build CMakeFiles/trees.dir/src/trees_wrapper.cpp.o: CXX_COMPILER__trees_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/src/trees_wrapper.cpp || cmake_object_order_depends_target_trees
+build CMakeFiles/trees.dir/src/trees_wrapper.cpp.o: CXX_COMPILER__trees_Release /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/src/trees_wrapper.cpp || cmake_object_order_depends_target_trees
   DEFINES = -DBOOST_PYTHON_DYN_LINK -DBOOST_PYTHON_NO_LIB -Dtrees_EXPORTS
   DEP_FILE = CMakeFiles/trees.dir/src/trees_wrapper.cpp.o.d
   FLAGS = -O3 -DNDEBUG -fPIC -std=gnu++23
-  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/PRIVATE -I/usr/include/python3.10
+  INCLUDES = -I/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/PRIVATE -I/usr/include/python3.10
   OBJECT_DIR = CMakeFiles/trees.dir
   OBJECT_FILE_DIR = CMakeFiles/trees.dir/src
   TARGET_COMPILE_PDB = CMakeFiles/trees.dir/
@@ -204,7 +204,7 @@ build CMakeFiles/trees.dir/src/trees_wrapper.cpp.o: CXX_COMPILER__trees_Release 
 
 build trees.so: CXX_MODULE_LIBRARY_LINKER__trees_Release CMakeFiles/trees.dir/src/trees_wrapper.cpp.o | /usr/lib/libpython3.10.so libtrees_lib.so /usr/lib/libboost_python310.so.1.78.0 /usr/lib/libpython3.10.so || libtrees_lib.so
   LANGUAGE_COMPILE_FLAGS = -O3 -DNDEBUG
-  LINK_LIBRARIES = -Wl,-rpath,/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist  /usr/lib/libpython3.10.so  libtrees_lib.so  /usr/lib/libboost_python310.so.1.78.0  /usr/lib/libpython3.10.so
+  LINK_LIBRARIES = -Wl,-rpath,/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist  /usr/lib/libpython3.10.so  libtrees_lib.so  /usr/lib/libboost_python310.so.1.78.0  /usr/lib/libpython3.10.so
   OBJECT_DIR = CMakeFiles/trees.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -217,7 +217,7 @@ build trees.so: CXX_MODULE_LIBRARY_LINKER__trees_Release CMakeFiles/trees.dir/sr
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist && /usr/bin/ccmake -S/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib -B/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist
+  COMMAND = cd /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist && /usr/bin/ccmake -S/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib -B/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -229,7 +229,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist && /usr/bin/cmake --regenerate-during-build -S/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib -B/home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist
+  COMMAND = cd /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist && /usr/bin/cmake --regenerate-during-build -S/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib -B/home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -253,7 +253,7 @@ build trees_lib: phony libtrees_lib.so
 # =============================================================================
 
 #############################################
-# Folder: /home/psycho/Docs/Prog/Github/pushsla/self/easy_tools.py/cpp_lib/dist
+# Folder: /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/dist
 
 build all: phony libprimitives_lib.so primitives.so libtrees_lib.so trees.so
 
