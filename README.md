@@ -35,11 +35,14 @@ pip install easy-pytools
     - [x] Cartesian product
     - [x] SELECT from table composition
     - [x] Treat Composition as Table
-  - [x] Advanced Table operations
+  - [ ] Advanced Table operations
     - [x] WHERE selection
     - [x] Ordering
     - [x] Aggregate functions
     - [x] HAVING section with auto-detection inside WHERE
+    - [ ] Table UNION
+    - [ ] Altering table
+    - [ ] Add constraints to table
   - [ ] Views
   - [x] Other SQL shit
     - [x] Convert JSON-like data mappings to DBase, Table etc
