@@ -35,7 +35,7 @@ def table_to_schema(table: '_Table.Table') -> dict[str, str]:
     return schema
 
 
-def map_to_base(db_name: str, data_map: Mapping[str, Sequence[Mapping[str, Any]]]) -> '_Base.DBase':
+def map_to_base(db_name: str, data_map: Mapping[str, Sequence[Mapping[str, Any]]], primary_fields: Mapping[str, str]) -> '_Base.DBase':
     """
     Create DBase from data mapping.
 
@@ -44,10 +44,12 @@ def map_to_base(db_name: str, data_map: Mapping[str, Sequence[Mapping[str, Any]]
 
     :param db_name: database filename
     :param data_map: data mapping
+    :param primary_fields: mapping for spec primary key fields <Table_name: Primaryfield_name>
     """
     db = _Base.DBase(db_name)
     for table_name, table_data in data_map.items():
-        seq_to_table(db, table_name, table_data)
+        pk = primary_fields[table_name] if table_name in primary_fields else None
+        seq_to_table(db, table_name, table_data, primary_field=pk)
 
     return db
 
