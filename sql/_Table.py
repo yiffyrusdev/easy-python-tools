@@ -176,6 +176,12 @@ class Table:
 
         return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
 
+    def DROP(self) -> None:
+        """
+        Drop current table from DBase.
+        """
+        self._db.drop(self.name)
+
     def INSERT(self, values: Mapping[str, Any] | Sequence):
         """
         Insert new row into this Table with specified values.

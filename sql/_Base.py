@@ -85,25 +85,34 @@ class DBase:
         """
         return self.query(f'SELECT {",".join(fields)} FROM {source};').fetchall()
 
-    def insert(self, target: str, fields: Iterable[str], values: Iterable) -> None:
+    def insert(self, target_table: str, target_fields: Iterable[str], values: Iterable) -> None:
         """
         Insert values into target table.
 
-        :param target: target table string name as it is in database.
-        :param fields: iterable collection of target fields
+        :param target_table: target table string name as it is in database.
+        :param target_fields: iterable collection of target fields
         :param values: iterable collection of target values
         :return:
         """
         f_names = []
         f_values = []
-        for f, v in zip(fields, _internal.proper_values(values)):
+        for f, v in zip(target_fields, _internal.proper_values(values)):
             if v == "NULL":
                 continue
             f_names.append(f)
             f_values.append(v)
 
-        self.query(f'INSERT INTO {target}({",".join(f_names)}) VALUES({",".join(f_values)});', commit=True)
+        self.query(f'INSERT INTO {target_table}({",".join(f_names)}) VALUES({",".join(f_values)});', commit=True)
         self._db_connection.commit()
+
+    def drop(self, target_table: str, suppress_nonexisting=False) -> None:
+        """
+        Drop table from current DBase.
+
+        :param target_table: target table name as it is in sqlite base
+        :param suppress_nonexisting: True -- add 'IF EXISTS', so no error on table is not in db
+        """
+        self.query(f'DROP TABLE {target_table} {"IF EXISTS" if suppress_nonexisting else ""};')
 
     def has_tables(self, tables: Iterable[Union[str, '_Table.Table']]) -> bool:
         """

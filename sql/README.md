@@ -438,6 +438,13 @@ SELECT
 
 ```
 
+#### 13. Drop table
+```python
+db.drop("Printers")
+# or
+printers.DROP()
+```
+
 ## Advanced stuff
 ### Convert your data mapping to a DBase or Table
 You can automatically create Table or even a DBase from existing JSON-like data with **parsing** submodule.
@@ -651,3 +658,12 @@ base_to_dict(db)
   ]
 }
 ```
+
+## Other things
+
+You can always make any SQL request to DBase with **query** method.
+
+There also some DBase methods, that can make querying more simple:
+- insert(target_table, target_fields, values)
+- select(source_table, fields)
+- drop(target_table)
