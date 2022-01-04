@@ -3,6 +3,38 @@ from . import _Table
 from . import _Base
 
 
+def base_to_dict(base: '_Base.DBase') -> dict[str, list[dict[str, Any]]]:
+    tables = dict()
+    for t_name in base.tables:
+        t = base.table(t_name)
+        tables.update({t_name: table_to_list(t)})
+
+    return tables
+
+
+def table_to_list(table: '_Table.Table') -> list[dict[str, Any]]:
+    query = table[:]
+    fields = [f.name for f in query.fields]
+    body = query()
+
+    rows = [dict(zip(fields, row)) for row in body]
+    return rows
+
+
+def table_to_schema(table: '_Table.Table') -> dict[str, str]:
+    schema = dict()
+    for f in table.fields.values():
+        signature = f'{f.type} {"NOT NULL" if not f.is_nullable else ""} {"PRIMARY KEY" if f.is_primary else ""}'
+        schema.update({f.name: signature})
+
+    for f in table.foreign_keys.values():
+        key = f'foreign key({f.slave_field.name})'
+        signature = f'references {f.master_field.table.name}({f.master_field.name})'
+        schema.update({key: signature})
+
+    return schema
+
+
 def map_to_base(db_name: str, data_map: Mapping[str, Sequence[Mapping[str, Any]]]) -> '_Base.DBase':
     """
     Create DBase from data mapping.

@@ -451,7 +451,7 @@ Available conversions:
 
 let me show you some examples:
 ```python
-from sql.parsing import python_to_sql_type, map_to_schema, seq_to_schema, seq_to_table, map_to_base
+from easy_pytools.sql.parsing import python_to_sql_type, map_to_schema, seq_to_schema, seq_to_table, map_to_base
 ```
 
 Type parsing:
@@ -549,4 +549,101 @@ db.tables
 DBase<test.sql>
 
 {'Cars', 'Users', 'sqlite_sequence'}
+```
+
+### Convert Table of DBase to data mapping
+#### Get schema of table
+```python
+from easy_pytools.sql.parsing import table_to_schema
+
+table_to_schema(printers)
+```
+```python
+{
+    'id': 'INTEGER NOT NULL PRIMARY KEY',
+    'name': 'varchar(20) NOT NULL ',
+    'vendor_id': 'INTEGER NOT NULL ',
+    'foreign key(vendor_id)': 'references Vendors(id)'
+}
+```
+
+#### Extract data from Table
+```python
+from easy_pytools.sql.parsing import table_to_list
+
+table_to_list(printers)
+```
+```python
+[
+    {'id': 1, 'name': 'Canon L100', 'vendor_id': 1},
+    {'id': 2, 'name': 'Canon L200', 'vendor_id': 1}
+]
+```
+
+#### Extract data from DBase
+```python
+from easy_pytools.sql.parsing import base_to_dict
+
+base_to_dict(db)
+```
+```python
+{
+  'sqlite_sequence': [
+    {'name': 'Vendors','seq': 4},
+    {'name': 'Users','seq': 4},
+    {'name': 'Printers','seq': 2}
+  ],
+  'Printers': [
+    {'id': 1,'name': 'Canon L100','vendor_id': 1},
+    {'id': 2,'name': 'Canon L200','vendor_id': 1}
+  ],
+  'Cars': [
+    {'reg': 10001,'vendor_id': 1,'model': 'Rangerover'},
+    {'reg': 10003,'vendor_id': 1,'model': 'Rangerover'},
+    {'reg': 10004,'vendor_id': 1,'model': 'Rangerover'},
+    {'reg': 10005,'vendor_id': 1,'model': 'Rangerover'},
+    {'reg': 10011,'vendor_id': 1,'model': 'Raf4'},
+    {'reg': 10012,'vendor_id': 1,'model': 'Raf4'},
+    {'reg': 10013,'vendor_id': 1,'model': 'Raf4'},
+    {'reg': 10021,'vendor_id': 1,'model': 'Cruiser'},
+    {'reg': 10022,'vendor_id': 1,'model': 'Cruiser'},
+    {'reg': 20011,'vendor_id': 2,'model': 'Priora'},
+    {'reg': 20012,'vendor_id': 2,'model': 'Priora'},
+    {'reg': 20021,'vendor_id': 2,'model': 'Vesta'},
+    {'reg': 20022,'vendor_id': 2,'model': 'Vesta'},
+    {'reg': 20023,'vendor_id': 2,'model': 'Vesta'},
+    {'reg': 20031,'vendor_id': 2,'model': 'Kalina'},
+    {'reg': 20032,'vendor_id': 2,'model': 'Kalina'},
+    {'reg': 20033,'vendor_id': 2,'model': 'Kalina'},
+    {'reg': 20034,'vendor_id': 2,'model': 'Kalina'},
+    {'reg': 20035,'vendor_id': 2,'model': 'Kalina'}
+  ],
+  'User_Car': [
+    {'user_id': 1,'car_reg': 10001},
+    {'user_id': 1,'car_reg': 10003},
+    {'user_id': 1,'car_reg': 10012},
+    {'user_id': 1,'car_reg': 10013},
+    {'user_id': 1,'car_reg': 10021},
+    {'user_id': 2,'car_reg': 10021},
+    {'user_id': 2,'car_reg': 20011},
+    {'user_id': 2,'car_reg': 20021},
+    {'user_id': 3,'car_reg': 20022},
+    {'user_id': 3,'car_reg': 20034},
+    {'user_id': 3,'car_reg': 10005},
+    {'user_id': 4,'car_reg': 10011},
+    {'user_id': 4,'car_reg': 19911}
+  ],
+  'Users': [
+    {'id': 1,'name': 'Vasily','email': 'v@mail.ru','card': 101010},
+    {'id': 2,'name': 'Dmitry','email': 'd@mail.ru','card': 10123798},
+    {'id': 3,'name': 'Michael','email': 'm@gmail.com','card': 9827798},
+    {'id': 4,'name': 'John','email': 'j@gmail.com','card': 623898}
+  ],
+  'Vendors': [
+    {'id': 1,'name': 'Tamoyo','country': 'Japan'},
+    {'id': 2,'name': 'Lada','country': 'Russia'},
+    {'id': 3,'name': 'KAMAZ','country': 'Russia'},
+    {'id': 4,'name': 'Haviko','country': 'Japan'}
+  ]
+}
 ```

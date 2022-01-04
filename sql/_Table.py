@@ -373,13 +373,13 @@ class Table:
 
 class TableField:
     """TableField object, that represents some Table field."""
-    def __init__(self, i: int, name: str, typ: str, table_obj: Table, is_primary = False, attrs: set[str] = None):
+    def __init__(self, i: int, name: str, typ: str, table_obj: Table, is_primary=False, is_nullable=False):
         self.id = i
         self.name = name
         self.type = typ
         self.table = table_obj
         self.is_primary = is_primary
-        self.attrs = attrs if attrs is not None else set()
+        self.is_nullable = is_nullable
 
     @property
     def full_name(self) -> str:

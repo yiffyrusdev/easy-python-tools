@@ -202,7 +202,11 @@ class DBase:
         :return: dict of {field_name: TableField object}
         """
         result = self.query(f'PRAGMA table_info({table.query})').fetchall()
-        fields = dict((f"{table.name}.{name}", _Table.TableField(i, name, typ, table, is_primary=(pk != 0))) for i,name,typ,_,_,pk in result)
+        fields = dict((
+                          f"{table.name}.{name}",
+                          _Table.TableField(i, name, typ, table, is_primary=(pk != 0), is_nullable=(nullable != 0))
+                      )
+                      for i,name,typ,nullable,default,pk in result)
 
         return fields
 
