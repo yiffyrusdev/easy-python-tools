@@ -42,6 +42,8 @@ pip install -i https://test.pypi.org/simple/ easy-pytools
     - [x] HAVING section with auto-detection inside WHERE
   - [ ] Views
   - [ ] Other SQL shit
+    - [x] Convert JSON-like data mappings to DBase, Table etc
+    - [ ] Convert DBase, Table to data mappings
 - **Pseudo structures**
   - [x] Stack _(C++)_
   - [x] Queue _(C++)_

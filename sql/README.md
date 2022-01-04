@@ -437,3 +437,116 @@ SELECT
         FROM (Printers INNER JOIN Vendors ON Vendors.id = Printers.vendor_id) WHERE (((Vendors.country = "Japan") OR (Vendors.country = "Russia"))) GROUP BY Vendors.country HAVING ((COUNT(Vendors.name) = 2));
 
 ```
+
+## Advanced stuff
+### Convert your data mapping to a DBase or Table
+You can automatically create Table or even a DBase from existing JSON-like data with **parsing** submodule.
+
+Available conversions:
+- Convert Python type to SQL type with **python_to_sql_type** function
+- Convert data map to Table schema with **map_to_schema** function
+- Convert Sequence of data maps to Table schema with **seq_to_schema** function
+- Convert Sequence of data maps to Table with **seq_to_table** function
+- Convert Map of Sequences of data maps to DBase with **map_to_base** function
+
+let me show you some examples:
+```python
+from sql.parsing import python_to_sql_type, map_to_schema, seq_to_schema, seq_to_table, map_to_base
+```
+
+Type parsing:
+```python
+python_to_sql_type(12.4), python_to_sql_type("Hello")
+```
+```python
+"REAL", "TEXT"
+```
+
+Map to table schema:
+```python
+data = {'name': "Vasya", 'age': 12.5}
+map_to_schema(data)
+```
+```python
+{'name': 'TEXT', 'age': 'REAL'}
+```
+
+Sequence to schema:
+```python
+data = [
+    {'name': "Vasya", 'age': 12.5},
+    {'name': "Markus", 'age': 12.5, 'sex':"M"},
+    {'name': "Jane", 'age': 12.5, 'email':"v@om"}
+]
+seq_to_schema(data)
+```
+```python
+{'id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
+ 'name': 'TEXT',
+ 'age': 'REAL',
+ 'sex': 'TEXT',
+ 'email': 'TEXT'}
+```
+
+```python
+data = [
+    {'pass':10298, 'name': "Vasya", 'age': 12.5},
+    {'pass':2839, 'name': "Markus", 'age': 12.5, 'sex':"M"},
+    {'pass':819279, 'name': "Jane", 'age': 12.5, 'email':"v@om"}
+]
+seq_to_schema(data, primary_field='pass')
+```
+```python
+{'pass': 'INTEGER PRIMARY KEY',
+ 'name': 'TEXT',
+ 'age': 'REAL',
+ 'sex': 'TEXT',
+ 'email': 'TEXT'}
+```
+
+Data to Table:
+> Let us imagine that 'db' is a instance of existing DBase
+
+```python
+data = [
+    {'pass':10298, 'name': "Vasya", 'age': 12.5},
+    {'pass':2839, 'name': "Markus", 'age': 12.5, 'sex':"M"},
+    {'pass':819279, 'name': "Jane", 'age': 12.5, 'email':"v@om"}
+]
+
+table = seq_to_table(db, 'Users', data)
+
+table
+table.fields
+```
+```python
+Table<Users of d.sb, Real>
+
+{'Users.id': Field<0, id, INTEGER of Table<Users of d.sb, Real>>,
+ 'Users.pass': Field<1, pass, INTEGER of Table<Users of d.sb, Real>>,
+ 'Users.name': Field<2, name, TEXT of Table<Users of d.sb, Real>>,
+ 'Users.age': Field<3, age, REAL of Table<Users of d.sb, Real>>,
+ 'Users.sex': Field<4, sex, TEXT of Table<Users of d.sb, Real>>,
+ 'Users.email': Field<5, email, TEXT of Table<Users of d.sb, Real>>}
+
+```
+
+Data to Dbase:
+```python
+data = {"Users": [{"name": "Vasya", "age": 30, "email": "vasyan@com"},
+                  {"name": "Petya", 'age': 42},],
+        "Cars": [{'model': 'Lada v1'},
+                 {'model': 'KAMAZ'},
+                 {'model': 'Logan x590'}],
+        }
+
+db = map_to_base("mybase.sql", data)
+
+db
+db.tables
+```
+```python
+DBase<test.sql>
+
+{'Cars', 'Users', 'sqlite_sequence'}
+```

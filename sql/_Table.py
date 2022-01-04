@@ -1,4 +1,4 @@
-from typing import Iterable, Union
+from typing import Iterable, Union, Mapping, Any, Sequence
 from . import _Base
 from . import _Query
 from . import aggregate
@@ -176,7 +176,7 @@ class Table:
 
         return Table(name, self.db, table_query=f'({query})', binded_tables=binded)
 
-    def INSERT(self, values: dict | tuple):
+    def INSERT(self, values: Mapping[str, Any] | Sequence):
         """
         Insert new row into this Table with specified values.
 
@@ -343,7 +343,7 @@ class Table:
         """
         return self.INNER(other)
 
-    def __lshift__(self, values: tuple | dict) -> None:
+    def __lshift__(self, values: Mapping[str, Any] | Sequence) -> None:
         """
         Insert new row into this Table with specified values.
 

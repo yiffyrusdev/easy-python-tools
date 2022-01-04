@@ -55,7 +55,6 @@ class DBase:
         else:
             fields = f'{", ".join(f"{k} {v}" for k, v in fields.items())}'
             query = f'CREATE TABLE {table_name}({fields});'
-            print(query)
             self.query(query)
             self._db_connection.commit()
 
