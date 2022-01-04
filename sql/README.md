@@ -551,6 +551,10 @@ DBase<test.sql>
 {'Cars', 'Users', 'sqlite_sequence'}
 ```
 
+You can also specifu foreign keys with 'foreign_fields' parameter. (See type hints and docstrings).
+
+Note, that Master tables must go first in data mapping, and slave tables must go after them.
+
 ### Convert Table of DBase to data mapping
 #### Get schema of table
 ```python
