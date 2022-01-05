@@ -1,6 +1,7 @@
 from typing import Iterable, Union, Mapping, Any, Sequence
 from . import _Base
 from . import _Query
+from . import _FieldConstraints as _Constr
 from . import aggregate
 
 
@@ -379,18 +380,46 @@ class Table:
 
 class TableField:
     """TableField object, that represents some Table field."""
-    def __init__(self, i: int, name: str, typ: str, table_obj: Table, is_primary=False, is_nullable=False):
+    def __init__(self, i: int, name: str, typ: str, table_obj: Table,
+                 constraints: Iterable['_Constr.FieldConstraint'] = None):
         self.id = i
         self.name = name
         self.type = typ
         self.table = table_obj
-        self.is_primary = is_primary
-        self.is_nullable = is_nullable
+        self.constraints = list(constraints) if constraints else list()
 
     @property
     def full_name(self) -> str:
         """Full name means <Table name>.<Field name>"""
         return self.table.field_from_name(self.name)
+
+    @property
+    def is_primary(self) -> bool:
+        for c in self.constraints:
+            if isinstance(c, _Constr.Primary):
+                return True
+        return False
+
+    @property
+    def is_nullable(self) -> bool:
+        for c in self.constraints:
+            if isinstance(c, _Constr.NotNull):
+                return False
+        return True
+
+    @property
+    def is_foreign(self) -> bool:
+        for c in self.constraints:
+            if isinstance(c, _Constr.Foreign):
+                return True
+        return False
+
+    @property
+    def is_checked(self) -> bool:
+        for c in self.constraints:
+            if isinstance(c, _Constr.Check):
+                return True
+        return False
 
     def __repr__(self) -> str:
         return f'Field<{self.id}, {self.name}, {self.type} of {self.table}>'
@@ -422,14 +451,6 @@ class CalculatedField:
     @property
     def type(self) -> str:
         return self.field.type
-
-    @property
-    def is_primary(self) -> bool:
-        return self.field.is_primary
-
-    @property
-    def attrs(self) -> set[str]:
-        return self.field.attrs
 
     @property
     def name(self):

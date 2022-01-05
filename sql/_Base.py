@@ -4,6 +4,7 @@ from typing import Iterable, Union
 from . import _exceptions
 from . import _Table
 from . import _internal
+from . import _FieldConstraints as _Constr
 
 
 class DBase:
@@ -211,11 +212,23 @@ class DBase:
         :return: dict of {field_name: TableField object}
         """
         result = self.query(f'PRAGMA table_info({table.query})').fetchall()
-        fields = dict((
-                          f"{table.name}.{name}",
-                          _Table.TableField(i, name, typ, table, is_primary=(pk != 0), is_nullable=(nullable != 0))
-                      )
-                      for i,name,typ,nullable,default,pk in result)
+        fks = self.query(f'PRAGMA foreign_key_list({table.query})').fetchall()
+        fields = dict()
+        for i, name, typ, nullable, default, pk in result:
+            constraints = []
+            if pk:
+                constraints.append(_Constr.Primary())
+            if not nullable:
+                constraints.append(_Constr.NotNull())
+            if default:
+                constraints.append(_Constr.Default(default))
+            fields.update({f"{table.name}.{name}": _Table.TableField(i, name, typ, table, constraints=constraints)})
+
+        for fk in fks:
+            master_name = fk[2]
+            master_field = fk[4]
+            slave_field = fk[3]
+            fields[f'{table.name}.{slave_field}'].constraints.append(_Constr.Foreign(f'{master_name}.{master_field}'))
 
         return fields
 
