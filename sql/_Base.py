@@ -216,8 +216,8 @@ class DBase:
         fields = dict()
         for i, name, typ, nullable, default, pk in result:
             constraints = []
-            if pk:
-                constraints.append(_Constr.Primary())
+            if pk != 0:
+                constraints.append(_Constr.Primary(pk))
             if not nullable:
                 constraints.append(_Constr.NotNull())
             if default:
@@ -266,3 +266,7 @@ class DBase:
 
     def __repr__(self) -> str:
         return f'DBase<{self.name}>'
+
+    def __del__(self):
+        self._db_cursor.close()
+        self._db_connection.close()

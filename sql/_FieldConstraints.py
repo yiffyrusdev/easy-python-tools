@@ -3,7 +3,7 @@ class FieldConstraint:
     name = ""
 
     def __init__(self, *args):
-        self.details = args
+        self.details = [str(a) for a in args]
 
     def __str__(self) -> str:
         return self.__repr__()

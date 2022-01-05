@@ -422,7 +422,7 @@ class TableField:
         return False
 
     def __repr__(self) -> str:
-        return f'Field<{self.id}, {self.name}, {self.type} of {self.table}, {",".join(self.constraints)}>'
+        return f'Field<{self.id}, {self.name}, {self.type} of {self.table}, {self.constraints}>'
 
     def __eq__(self, other: 'TableField') -> bool:
         return (self.name == other.name) and (self.table == other.table)
