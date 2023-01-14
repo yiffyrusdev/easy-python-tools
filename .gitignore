@@ -10,4 +10,4 @@ structures/cpp_lib/dist/build.ninja
 structures/cpp_lib/dist/cmake_install.cmake
 structures/cpp_lib/dist/CMakeCache.txt
 structures/cpp_lib/.cmake
-tests/
+test.sql

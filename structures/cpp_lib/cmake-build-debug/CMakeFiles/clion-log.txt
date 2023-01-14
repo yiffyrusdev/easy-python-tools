@@ -1,6 +1,6 @@
-/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/ninja -G Ninja /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib
--- The C compiler identification is GNU 11.1.0
--- The CXX compiler identification is GNU 11.1.0
+/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/ninja -G Ninja -S /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib -B /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/cmake-build-debug
+-- The C compiler identification is GNU 12.1.0
+-- The CXX compiler identification is GNU 12.1.0
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done
 -- Check for working C compiler: /usr/bin/cc - skipped
@@ -11,8 +11,8 @@
 -- Check for working CXX compiler: /usr/bin/c++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
--- Found PythonLibs: /usr/lib/libpython3.10.so (found suitable version "3.10.1", minimum required is "3.10") 
--- Found Boost: /usr/lib64/cmake/Boost-1.78.0/BoostConfig.cmake (found version "1.78.0") found components: python 
+-- Found PythonLibs: /usr/lib/libpython3.10.so (found suitable version "3.10.5", minimum required is "3.10") 
+-- Found Boost: /usr/lib64/cmake/Boost-1.79.0/BoostConfig.cmake (found version "1.79.0") found components: python 
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/psycho/Docs/Prog/Github/pushsla/self/easy-pytools/easy_pytools/structures/cpp_lib/cmake-build-debug

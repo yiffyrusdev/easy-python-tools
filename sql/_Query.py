@@ -228,7 +228,7 @@ class SelectQuery:
         """
         Get result of SQL query, which is presented by current object.
 
-        :return: select SQL query result or last cached result.
+        :return: select SQL query result.
         """
         query = str(self)
         self._body = self._source.db.query(query, commit=False).fetchall()

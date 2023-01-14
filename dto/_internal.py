@@ -32,11 +32,11 @@ def set_value(self, field, value):
             if is_allowed(cls, field, value):
                 self.__dict__[field] = value
             else:
-                raise ValueError(f"'{value}' in not allowed for {field} in {cls} contract. Allowed: {cls.__dict__[allowed_values(field)]}")
+                raise ValueError(f"'{value}' in not allowed for '{field}' in {cls} contract. Allowed: {cls.__dict__[allowed_values(field)]}")
         else:
-            raise TypeError(f"{type(value)} is not a vaild type for {field} in {cls} contract. Use {valid_type}")
+            raise TypeError(f"{type(value)} is not a vaild type for '{field}' in {cls} contract. Use {valid_type}")
     else:
-        raise AttributeError(f"{field} is not a part of {cls} contract")
+        raise AttributeError(f"'{field}' is not a part of {cls} contract")
 
 
 def is_contract_field(cls: ClassVar, name: str) -> bool:
@@ -49,6 +49,15 @@ def is_allowed(cls: ClassVar, field: str, value) -> bool:
         return value in cls.__dict__[alfield]
     else:
         return True
+
+
+def write_tuple(self, values: tuple) -> None:
+    fields = tuple(public_fields(self).keys())
+    if len(fields) != len(values):
+        raise ValueError(f"Value amount mismatch. Contract has {len(fields)}, tuple got {len(values)}")
+
+    for i,v in enumerate(values):
+        set_value(self, fields[i], v)
 
 
 def public_fields(obj) -> dict:
