@@ -67,6 +67,19 @@ p1.age = 20
 p1.set_value('age', 20)
 ```
 
+Also if you exactly know order of public fields you can use _write_tuple_ method.
+
+You'll have to pass values for all transfer object fields:
+```python
+# Throws an exception:
+name_sex = ("Vasya", "M")
+p1.write_tuple(name_sex)
+
+# Lets do it right way:
+name_sex_age = ("Vasya", "M", 19)
+p1.write_tuple(name_sex_age)
+```
+
 ### Playing with field metadata
 #### Field associated names
 You can associate any name for the field, just give not only default value on class definition, but associative name as well:

@@ -26,9 +26,13 @@ pip install easy-pytools
 - **SQL shit (Oh God. PYTHON ONLY)** [see docs](./sql/README.md)
   - [x] Basic Table operations
     - [x] Single table CREATE
+      - [x] Single PRIMARY KEY
+      - [x] Foreign Keys
+      - [ ] Multiple-field PRIMARY KEY
     - [x] Single table INSERT
     - [x] Single table SELECT
     - [x] Single table UPDATE
+    - [x] Single table DELETE
     - [x] GROUP BY expressions
   - [x] Basic Table compositions
     - [x] Automatical INNER JOIN on foreign keys

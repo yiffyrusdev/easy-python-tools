@@ -5,6 +5,36 @@ from . import _internal
 from . import _exceptions
 
 
+class DeleteQuery:
+    """
+    DeleteQuery object to perform deletion from table.
+    """
+    def __init__(self, selection: 'SelectQuery'):
+        self._target = selection.source
+        self._fields = selection.fields
+        self._where = selection.where_condition
+
+        if not self._target.is_real:
+            raise _exceptions.TableIsNotReal(self._target.name)
+
+    def __call__(self, commit=True) -> None:
+        """
+        Make SQL DELETE Query, which presented by current object.
+
+        :param commit: True means to commit changes to database after query success
+        """
+        query = str(self)
+        self._target.db.query(query, commit=commit)
+
+    def __str__(self) -> str:
+        delete = f'DELETE FROM {self._target.name}'
+        where = f' WHERE {self._where}' if self._where is not None else ""
+        return f"{delete}{where}"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
 class UpdateQuery:
     """
     UpdateQuert object to perform update on table.
@@ -201,28 +231,37 @@ class SelectQuery:
         """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
         return UpdateQuery(self, values)
 
+    def DELETE(self) -> 'DeleteQuery':
+        """Make new DeleteQuest, that will delete rows selected with current SelectQuery."""
+        return DeleteQuery(self)
+
     def __eq__(self, values: list | tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
+        """== Make new SelectQuery, which is copy of current, but with additional selection condition on equalities."""
         return self.WHERE_EQ(values)
 
     def __gt__(self, values: list | tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which is copy of current, but with additional selection condition on greaters."""
+        """> Make new SelectQuery, which is copy of current, but with additional selection condition on greaters."""
         return self.WHERE_GT(values)
 
     def __lt__(self, values: list | tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which is copy of current, but with additional selection condition on lessers."""
+        """< Make new SelectQuery, which is copy of current, but with additional selection condition on lessers."""
         return self.WHERE_LT(values)
 
     def __mod__(self, fields: tuple) -> 'SelectQuery':
-        """Make new SelectQuery, which copy of current, but with grouping fields."""
+        """% Make new SelectQuery, which copy of current, but with grouping fields."""
         return self.GROUPBY(fields)
 
     def __div__(self, fields: tuple) -> 'SelectQuery':
+        """/ Make new SelectQuery, which copy of current, but with ordering fields."""
         return self.ORDERBY(fields)
 
     def __lshift__(self, values: tuple | dict) -> 'UpdateQuery':
-        """Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
+        """<< Make new UpdateQuery, that affects rows and fields selected with current SelectQuery."""
         return self.UPDATE(values)
+
+    def __neg__(self) -> 'DeleteQuery':
+        """-query Make new DeleteQuery, that will delete rows selected with current SelectQuery."""
+        return self.DELETE()
 
     def __call__(self) -> list[tuple]:
         """

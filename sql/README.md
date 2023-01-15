@@ -409,7 +409,28 @@ vendors['id', 'name'] == ((10, 2),)) << ((), "Tamoyo",) # Excption
 (vendors['id', 'name'] == ((2, 3),)) << {"name": "Tamoyo"}
 ```
 
-### 12. Aggregate functions
+### 12. Delete rows from table
+
+As for now, DELETE operation is very similar to SELECT: you have to select rows to delete
+and negotate SelectQuery object or use _DELETE_ method to get DeleteQueryObject.
+
+Note, that delete query does not support such things as joining, grouping etc. Only WHERE considions are supported.
+
+Also, you can only delete rows from real tabled, not from views of table compositions.
+```python
+# Delete all vendors with name "Tamoyo"
+-(vendors['name'] == ("Tamoyo",))
+# or
+(vendoes['name'] == ("Tamoyo",)).DELETE()
+
+# Only real tables supported (exception will be thrown):
+((vendors & printers)['name'] == ("Tamoyo",)).DELETE()
+```
+
+All expressions and operations of SelectQuery except of WHERE will be
+ignored when creating DELETE query.
+
+### 13. Aggregate functions
 Aggregate functions are available in separate submodule:
 ```python
 from easy_pytools.sql.aggregate import *
@@ -425,7 +446,7 @@ Use aggregates instead of regular field names in selection query:
 
 ```
 
-#### 12.1. Aggregate function selection conditions
+#### 13.1. Aggregate function selection conditions
 Just set conditions like to regular fields, selection object would automatically detect calculated fields and put them to HAVING section of query:
 ```python
 ((printers & vendors)[COUNT('Vendors.name'), 'country'] % ('country',)) == [2, ("Japan", "Russia")]
@@ -438,7 +459,7 @@ SELECT
 
 ```
 
-#### 13. Drop table
+#### 14. Drop table
 ```python
 db.drop("Printers")
 # or

@@ -2,7 +2,6 @@ from typing import Sequence, Mapping, Collection, Any
 from . import _Table
 from . import _Base
 
-
 def base_to_dict(base: '_Base.DBase') -> dict[str, list[dict[str, Any]]]:
     tables = dict()
     for t_name in base.tables:
